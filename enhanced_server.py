@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Enhanced SmartTest Arena Server with CAT Quiz Integration
+Deployed to Railway - Updated for production
 """
 
 from fastapi import FastAPI, HTTPException, Depends

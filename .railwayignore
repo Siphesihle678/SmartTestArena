@@ -1,0 +1,21 @@
+# Ignore old Flask server
+server.py
+
+# Ignore development files
+*.pyc
+__pycache__/
+*.db
+*.sqlite
+
+# Ignore test files
+test_*.py
+*_test.py
+
+# Ignore documentation
+*.md
+!README.md
+
+# Ignore development scripts
+migrate_db.py
+create_*.py
+deploy_*.py
