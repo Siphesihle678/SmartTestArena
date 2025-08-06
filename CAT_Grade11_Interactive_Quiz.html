@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAT Grade 11 - Enhanced Interactive Diagnostic Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .timer.warning {
+            background: rgba(255,193,7,0.8);
+            color: #333;
+        }
+
+        .timer.danger {
+            background: rgba(220,53,69,0.8);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: #f8f9fa;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .student-info {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 3px solid #e9ecef;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #495057;
+        }
+
+        .info-item input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section h2::before {
+            content: "📚";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .question {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+            transition: all 0.3s ease;
+        }
+
+        .question:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .question h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .option.selected {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+
+        .option.correct {
+            border-color: #27ae60;
+            background: #d4edda;
+        }
+
+        .option.incorrect {
+            border-color: #e74c3c;
+            background: #f8d7da;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .confidence-slider {
+            margin: 20px 0;
+        }
+
+        .confidence-slider label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .confidence-slider input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            outline: none;
+        }
+
+        .confidence-value {
+            text-align: center;
+            font-weight: bold;
+            color: #3498db;
+            margin-top: 5px;
+        }
+
+        .submit-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(39,174,96,0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39,174,96,0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .results h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .score-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .score-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .recommendations {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .recommendations h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .recommendation {
+            background: #e3f2fd;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .save-progress {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .auto-save {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .auto-save.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .timer {
+                position: static;
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="timer" id="timer">35:00</div>
+            <h1>CAT Grade 11 - Enhanced Interactive Diagnostic Quiz</h1>
+            <div class="subtitle">Assessment & Preparation Tool with Real-time Analytics</div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="student-info">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Student Name:</label>
+                    <input type="text" id="studentName" placeholder="Enter your full name">
+                </div>
+                <div class="info-item">
+                    <label>Email:</label>
+                    <input type="email" id="studentEmail" placeholder="Enter your email">
+                </div>
+                <div class="info-item">
+                    <label>Date:</label>
+                    <input type="date" id="testDate" value="">
+                </div>
+                <div class="info-item">
+                    <label>Test Date:</label>
+                    <input type="date" id="actualTestDate" value="">
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <form id="quizForm">
+                <div class="section">
+                    <h2>Part A: Theory Questions (15 minutes)</h2>
+                    
+                    <div class="question">
+                        <h3>1.1 What are the four main components of the information processing cycle?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_1.1" value="Input, Output, Processing, Storage">
+                                Input, Output, Processing, Storage
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_1.1" value="Input, Output, Processing, Communication">
+                                Input, Output, Processing, Communication
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_1.1" value="Input, Output, Storage, Communication">
+                                Input, Output, Storage, Communication
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_1.1" value="Input, Output, Processing, Storage, Communication">
+                                Input, Output, Processing, Storage, Communication
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h3>1.2 Which of the following is NOT an input device?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_1.2" value="Touchscreen">
+                                Touchscreen
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_1.2" value="Scanner">
+                                Scanner
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_1.2" value="Printer">
+                                Printer
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_1.2" value="Microphone">
+                                Microphone
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h3>1.3 What is the primary function of RAM?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_1.3" value="Permanent storage">
+                                Permanent storage
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_1.3" value="Temporary storage for running programs">
+                                Temporary storage for running programs
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_1.3" value="Processing calculations">
+                                Processing calculations
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_1.3" value="Display output">
+                                Display output
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>2. Hardware & Software</h2>
+                    
+                    <div class="question">
+                        <h3>2.1 What does SSD stand for?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_2.1" value="Solid State Drive">
+                                Solid State Drive
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_2.1" value="Secondary Storage Device">
+                                Secondary Storage Device
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_2.1" value="System Storage Drive">
+                                System Storage Drive
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_2.1" value="Software Storage Device">
+                                Software Storage Device
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h3>2.2 Which storage type is fastest?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_2.2" value="Hard Disk Drive (HDD)">
+                                Hard Disk Drive (HDD)
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_2.2" value="Solid State Drive (SSD)">
+                                Solid State Drive (SSD)
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_2.2" value="USB Flash Drive">
+                                USB Flash Drive
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_2.2" value="CD-ROM">
+                                CD-ROM
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h3>2.3 What is the purpose of a primary key in a database?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_2.3" value="To make the database look pretty">
+                                To make the database look pretty
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_2.3" value="To uniquely identify each record">
+                                To uniquely identify each record
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_2.3" value="To store the most important data">
+                                To store the most important data
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_2.3" value="To link to other databases">
+                                To link to other databases
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>3. Social Implications</h2>
+                    
+                    <div class="question">
+                        <h3>3.1 What is BYOD?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_3.1" value="Bring Your Own Device">
+                                Bring Your Own Device
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_3.1" value="Buy Your Own Data">
+                                Buy Your Own Data
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_3.1" value="Build Your Own Database">
+                                Build Your Own Database
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_3.1" value="Backup Your Own Documents">
+                                Backup Your Own Documents
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h3>3.2 Which is a common security threat?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_3.2" value="Malware">
+                                Malware
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_3.2" value="Hardware failure">
+                                Hardware failure
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_3.2" value="Software updates">
+                                Software updates
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_3.2" value="File compression">
+                                File compression
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Part B: Practical Questions (15 minutes)</h2>
+                    
+                    <div class="question">
+                        <h3>4.1 How do you create a bulleted list in Microsoft Word?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_4.1" value="Press Tab">
+                                Press Tab
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_4.1" value="Press Enter">
+                                Press Enter
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_4.1" value="Press Ctrl + Shift + L">
+                                Press Ctrl + Shift + L
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_4.1" value="Press Ctrl + B">
+                                Press Ctrl + B
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h3>4.2 What is the purpose of "Find and Replace"?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_4.2" value="To change font styles">
+                                To change font styles
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_4.2" value="To search for and change specific text">
+                                To search for and change specific text
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_4.2" value="To format paragraphs">
+                                To format paragraphs
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_4.2" value="To insert images">
+                                To insert images
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h3>5.1 What does the SUMIF function do?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_5.1" value="Adds all numbers in a range">
+                                Adds all numbers in a range
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_5.1" value="Adds numbers that meet a specific condition">
+                                Adds numbers that meet a specific condition
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_5.1" value="Counts cells with text">
+                                Counts cells with text
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_5.1" value="Finds the highest value">
+                                Finds the highest value
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h3>5.2 What is absolute cell referencing?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_5.2" value="Using $ signs to lock cell references">
+                                Using $ signs to lock cell references
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_5.2" value="Making cells bold">
+                                Making cells bold
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_5.2" value="Adding borders to cells">
+                                Adding borders to cells
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_5.2" value="Changing cell colors">
+                                Changing cell colors
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h3>5.3 What does #NULL! error mean?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_5.3" value="Cell is empty">
+                                Cell is empty
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_5.3" value="Invalid cell reference">
+                                Invalid cell reference
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_5.3" value="Formula error">
+                                Formula error
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_5.3" value="Circular reference">
+                                Circular reference
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h3>6.1 What is a field in a database?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_6.1" value="A row of data">
+                                A row of data
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_6.1" value="A column of data">
+                                A column of data
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_6.1" value="A table">
+                                A table
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_6.1" value="A query">
+                                A query
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <h3>6.2 What view do you use to design a table structure?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="question_6.2" value="Datasheet view">
+                                Datasheet view
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_6.2" value="Design view">
+                                Design view
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_6.2" value="Form view">
+                                Form view
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="question_6.2" value="Report view">
+                                Report view
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Part C: Self-Assessment (5 minutes)</h2>
+                    
+                    <div class="confidence-slider">
+                        <label>Rate your confidence level (1-5) for Systems Technologies:</label>
+                        <input type="range" id="confidence_systems" min="1" max="5" value="3">
+                        <div class="confidence-value" id="confidence_systems_value">3</div>
+                    </div>
+
+                    <div class="confidence-slider">
+                        <label>Rate your confidence level (1-5) for Hardware & Software:</label>
+                        <input type="range" id="confidence_hardware" min="1" max="5" value="3">
+                        <div class="confidence-value" id="confidence_hardware_value">3</div>
+                    </div>
+
+                    <div class="confidence-slider">
+                        <label>Rate your confidence level (1-5) for Social Implications:</label>
+                        <input type="range" id="confidence_social" min="1" max="5" value="3">
+                        <div class="confidence-value" id="confidence_social_value">3</div>
+                    </div>
+
+                    <div class="confidence-slider">
+                        <label>Rate your confidence level (1-5) for Word Processing:</label>
+                        <input type="range" id="confidence_word" min="1" max="5" value="3">
+                        <div class="confidence-value" id="confidence_word_value">3</div>
+                    </div>
+
+                    <div class="confidence-slider">
+                        <label>Rate your confidence level (1-5) for Spreadsheets:</label>
+                        <input type="range" id="confidence_spreadsheets" min="1" max="5" value="3">
+                        <div class="confidence-value" id="confidence_spreadsheets_value">3</div>
+                    </div>
+
+                    <div class="confidence-slider">
+                        <label>Rate your confidence level (1-5) for Database:</label>
+                        <input type="range" id="confidence_database" min="1" max="5" value="3">
+                        <div class="confidence-value" id="confidence_database_value">3</div>
+                    </div>
+
+                    <div class="question">
+                        <h3>What topics do you find most challenging?</h3>
+                        <textarea name="challenging_topics" rows="3" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px;"></textarea>
+                    </div>
+
+                    <div class="question">
+                        <h3>What topics do you feel most confident about?</h3>
+                        <textarea name="confident_topics" rows="3" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px;"></textarea>
+                    </div>
+                </div>
+
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        📊 Submit Your Quiz & Get Results
+                    </button>
+                </div>
+            </form>
+
+            <div class="results" id="results">
+                <h2>🎉 Quiz Results</h2>
+                <div class="score-grid" id="scoreGrid"></div>
+                <div class="recommendations" id="recommendations"></div>
+                <button onclick="window.print()" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 20px;">
+                    🖨️ Print Results
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="auto-save" id="autoSave">💾 Progress Saved</div>
+
+    <script>
+        // Timer functionality
+        let timeLeft = 35 * 60; // 35 minutes in seconds
+        let timerInterval;
+        let isSubmitted = false;
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time is up! Submitting quiz automatically.');
+                    submitQuiz();
+                } else if (timeLeft <= 300) { // 5 minutes warning
+                    document.getElementById('timer').classList.add('danger');
+                } else if (timeLeft <= 600) { // 10 minutes warning
+                    document.getElementById('timer').classList.add('warning');
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Progress tracking
+        function updateProgress() {
+            const totalQuestions = 15;
+            const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
+            const progress = (answeredQuestions / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        // Auto-save functionality
+        function saveProgress() {
+            const formData = new FormData(document.getElementById('quizForm'));
+            const progressData = {};
+            
+            for (let [key, value] of formData.entries()) {
+                progressData[key] = value;
+            }
+            
+            localStorage.setItem('quizProgress', JSON.stringify(progressData));
+            
+            // Show auto-save notification
+            const autoSave = document.getElementById('autoSave');
+            autoSave.classList.add('show');
+            setTimeout(() => autoSave.classList.remove('show'), 2000);
+        }
+
+        function loadProgress() {
+            const savedProgress = localStorage.getItem('quizProgress');
+            if (savedProgress) {
+                const progressData = JSON.parse(savedProgress);
+                
+                // Restore form data
+                for (let key in progressData) {
+                    const element = document.querySelector(`[name="${key}"]`);
+                    if (element) {
+                        if (element.type === 'radio') {
+                            const radio = document.querySelector(`[name="${key}"][value="${progressData[key]}"]`);
+                            if (radio) radio.checked = true;
+                        } else {
+                            element.value = progressData[key];
+                        }
+                    }
+                }
+                
+                updateProgress();
+            }
+        }
+
+        // Confidence sliders
+        document.querySelectorAll('input[type="range"]').forEach(slider => {
+            slider.addEventListener('input', function() {
+                document.getElementById(this.id + '_value').textContent = this.value;
+                saveProgress();
+            });
+        });
+
+        // Option selection
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                updateProgress();
+                saveProgress();
+            });
+        });
+
+        // Form submission
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!isSubmitted) {
+                submitQuiz();
+            }
+        });
+
+        function submitQuiz() {
+            if (isSubmitted) return;
+            isSubmitted = true;
+            
+            clearInterval(timerInterval);
+            
+            const formData = new FormData(document.getElementById('quizForm'));
+            const quizData = {};
+            
+            for (let [key, value] of formData.entries()) {
+                quizData[key] = value;
+            }
+            
+            // Add student info
+            quizData.student_name = document.getElementById('studentName').value;
+            quizData.email = document.getElementById('studentEmail').value;
+            quizData.test_date = document.getElementById('testDate').value;
+            quizData.actual_test_date = document.getElementById('actualTestDate').value;
+            
+            // Add confidence levels
+            quizData.confidence_systems = document.getElementById('confidence_systems').value;
+            quizData.confidence_hardware = document.getElementById('confidence_hardware').value;
+            quizData.confidence_social = document.getElementById('confidence_social').value;
+            quizData.confidence_word = document.getElementById('confidence_word').value;
+            quizData.confidence_spreadsheets = document.getElementById('confidence_spreadsheets').value;
+            quizData.confidence_database = document.getElementById('confidence_database').value;
+            
+            // Disable submit button
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').textContent = 'Submitting...';
+            
+            fetch('/submit_quiz', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(quizData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showResults(data.results, data.recommendations);
+                    // Clear saved progress
+                    localStorage.removeItem('quizProgress');
+                } else {
+                    alert('Error submitting quiz: ' + data.error);
+                    isSubmitted = false;
+                    document.getElementById('submitBtn').disabled = false;
+                    document.getElementById('submitBtn').textContent = '📊 Submit Your Quiz & Get Results';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error submitting quiz. Please try again.');
+                isSubmitted = false;
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').textContent = '📊 Submit Your Quiz & Get Results';
+            });
+        }
+
+        function showResults(results, recommendations) {
+            const resultsDiv = document.getElementById('results');
+            const scoreGrid = document.getElementById('scoreGrid');
+            const recommendationsDiv = document.getElementById('recommendations');
+            
+            // Create score cards
+            scoreGrid.innerHTML = `
+                <div class="score-card">
+                    <h3>Total Score</h3>
+                    <div class="score-value">${results.total_score.toFixed(1)}%</div>
+                </div>
+                <div class="score-card">
+                    <h3>Theory Score</h3>
+                    <div class="score-value">${results.theory_percentage.toFixed(1)}%</div>
+                </div>
+                <div class="score-card">
+                    <h3>Practical Score</h3>
+                    <div class="score-value">${results.practical_percentage.toFixed(1)}%</div>
+                </div>
+                <div class="score-card">
+                    <h3>Questions Correct</h3>
+                    <div class="score-value">${results.correct_answers}/${results.total_questions}</div>
+                </div>
+            `;
+            
+            // Show recommendations
+            recommendationsDiv.innerHTML = `
+                <h3>📚 Study Recommendations</h3>
+                ${recommendations.map(rec => `<div class="recommendation">💡 ${rec}</div>`).join('')}
+            `;
+            
+            resultsDiv.style.display = 'block';
+            
+            // Scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('testDate').value = today;
+            document.getElementById('actualTestDate').value = today;
+            
+            // Load saved progress
+            loadProgress();
+            
+            // Start timer
+            startTimer();
+            
+            // Auto-save every 30 seconds
+            setInterval(saveProgress, 30000);
+        });
+    </script>
+</body>
+</html> 
