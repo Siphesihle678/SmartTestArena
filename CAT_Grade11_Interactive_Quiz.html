@@ -479,15 +479,16 @@
                 </div>
                 <div class="info-group">
                     <label for="testDate">Test Date:</label>
-                    <input type="text" value="August 26th, 2025" readonly>
+                    <input type="text" id="testDate" name="testDate" value="August 26th, 2025" readonly>
                 </div>
             </div>
         </div>
 
-        <div class="content">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
+        <form id="quizForm">
+            <div class="content">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
 
             <div class="quiz-section">
                 <div class="section-header">
@@ -609,19 +610,19 @@
                     <h4>2.3 What is the purpose of a primary key in a database?</h4>
                     <div class="options">
                         <label class="option">
-                            <input type="radio" name="question_2.2" value="A">
+                            <input type="radio" name="question_2.3" value="A">
                             To make the database look pretty
                         </label>
                         <label class="option">
-                            <input type="radio" name="question_2.2" value="B">
+                            <input type="radio" name="question_2.3" value="B">
                             To uniquely identify each record
                         </label>
                         <label class="option">
-                            <input type="radio" name="question_2.2" value="C">
+                            <input type="radio" name="question_2.3" value="C">
                             To store the most important data
                         </label>
                         <label class="option">
-                            <input type="radio" name="question_2.2" value="D">
+                            <input type="radio" name="question_2.3" value="D">
                             To link to other databases
                         </label>
                     </div>
@@ -892,6 +893,7 @@
                 <div class="auto-save" id="autoSave">Auto-save enabled</div>
             </div>
         </div>
+        </form>
     </div>
 
     <div class="results-section" id="resultsSection">
@@ -951,18 +953,9 @@
 
         // Progress bar
         function updateProgress() {
-            const totalQuestions = document.querySelectorAll('input[type="radio"]').length;
-            let answered = 0;
-            
-            document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
-                const questionName = radio.name;
-                const correctAnswer = document.querySelector(`input[name="${questionName}"][value="${radio.value}"]`).closest('.question').querySelector('input[type="radio"]:checked').value;
-                if (radio.value === correctAnswer) {
-                    answered++;
-                }
-            });
-            
-            const progress = (answered / totalQuestions) * 100;
+            const totalQuestions = document.querySelectorAll('input[type="radio"]').length / 4; // 4 options per question
+            const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
+            const progress = (answeredQuestions / totalQuestions) * 100;
             
             document.getElementById('progressFill').style.width = progress + '%';
         }
