@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #!/usr/bin/env python3
 """
 Enhanced Quiz Server for CAT Grade 11 Tutoring
@@ -122,11 +121,11 @@ def add_question():
     try:
         data = request.json
         question_id = str(uuid.uuid4())
-        data['question_id'] = question_id
+        data['id'] = question_id
         data['created_at'] = datetime.now().isoformat()
         questions_bank[question_id] = data
         save_all_data()
-        return jsonify({"success": True, "question_id": question_id})
+        return jsonify({"success": True, "message": "Question added successfully!", "question_id": question_id})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
@@ -135,11 +134,12 @@ def update_question(question_id):
     try:
         data = request.json
         if question_id in questions_bank:
+            data['updated_at'] = datetime.now().isoformat()
             questions_bank[question_id].update(data)
-            questions_bank[question_id]['updated_at'] = datetime.now().isoformat()
             save_all_data()
-            return jsonify({"success": True})
-        return jsonify({"success": False, "error": "Question not found"}), 404
+            return jsonify({"success": True, "message": "Question updated successfully!"})
+        else:
+            return jsonify({"success": False, "error": "Question not found"}), 404
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
@@ -149,249 +149,252 @@ def delete_question(question_id):
         if question_id in questions_bank:
             del questions_bank[question_id]
             save_all_data()
-            return jsonify({"success": True})
-        return jsonify({"success": False, "error": "Question not found"}), 404
+            return jsonify({"success": True, "message": "Question deleted successfully!"})
+        else:
+            return jsonify({"success": False, "error": "Question not found"}), 404
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/export_results')
 def export_results():
-    try:
-        format_type = request.args.get('format', 'csv')
-        
-        if format_type == 'csv':
-            return export_csv()
-        elif format_type == 'pdf':
-            return export_pdf()
-        elif format_type == 'excel':
-            return export_excel()
-        else:
-            return jsonify({"success": False, "error": "Unsupported format"}), 400
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+    format_type = request.args.get('format', 'csv')
+    
+    if format_type == 'csv':
+        return export_csv()
+    elif format_type == 'pdf':
+        return export_pdf()
+    elif format_type == 'excel':
+        return export_excel()
+    else:
+        return jsonify({"success": False, "error": "Invalid format"}), 400
 
 @app.route('/get_student_progress/<student_email>')
 def get_student_progress(student_email):
     try:
         student_submissions = [s for s in submissions if s.get('email') == student_email]
-        return jsonify({
-            "submissions": student_submissions,
-            "progress": calculate_student_progress(student_submissions)
-        })
+        if not student_submissions:
+            return jsonify({"success": False, "error": "Student not found"}), 404
+        
+        progress_data = calculate_student_progress(student_submissions)
+        return jsonify({"success": True, "progress": progress_data})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/get_leaderboard')
 def get_leaderboard():
     try:
-        # Calculate leaderboard based on recent submissions
-        recent_submissions = [s for s in submissions 
-                            if datetime.fromisoformat(s['submission_time']) > 
-                            datetime.now() - timedelta(days=7)]
+        # Get top 10 recent submissions by score
+        recent_submissions = sorted(
+            [s for s in submissions if 'results' in s and 'total_score' in s['results']],
+            key=lambda x: x['results']['total_score'],
+            reverse=True
+        )[:10]
         
         leaderboard = []
-        for submission in recent_submissions:
-            total_score = submission.get('total_score', 0)
+        for i, submission in enumerate(recent_submissions, 1):
             leaderboard.append({
-                'name': submission.get('student_name', 'Anonymous'),
+                'rank': i,
+                'name': submission.get('name', 'Anonymous'),
                 'email': submission.get('email', ''),
-                'score': total_score,
-                'date': submission['submission_time']
+                'score': f"{submission['results']['total_score']:.1f}%",
+                'date': submission['submission_time'][:10]
             })
         
-        # Sort by score descending
-        leaderboard.sort(key=lambda x: x['score'], reverse=True)
-        
-        return jsonify(leaderboard[:10])  # Top 10
+        return jsonify({"success": True, "leaderboard": leaderboard})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
 def calculate_quiz_results(data):
-    """Calculate detailed quiz results and scores"""
-    results = {
-        'theory_score': 0,
-        'practical_score': 0,
-        'total_score': 0,
-        'topic_scores': {},
-        'correct_answers': 0,
-        'total_questions': 0
-    }
-    
-    # Define correct answers (you can expand this)
+    """Calculate quiz results based on predefined correct answers"""
+    # Define correct answers for the quiz
     correct_answers = {
-        '1.1': 'Input, Output, Processing, Storage',
-        '1.2': 'Printer',
-        '1.3': 'Temporary storage for running programs',
-        '2.1': 'Solid State Drive',
-        '2.2': 'Solid State Drive (SSD)',
-        '2.3': 'To uniquely identify each record',
-        '3.1': 'Bring Your Own Device',
-        '3.2': 'Malware',
-        '4.1': 'Press Ctrl + Shift + L',
-        '4.2': 'To search for and change specific text',
-        '5.1': 'Adds numbers that meet a specific condition',
-        '5.2': 'Using $ signs to lock cell references',
-        '5.3': 'Invalid cell reference',
-        '6.1': 'A column of data',
-        '6.2': 'Design view'
+        'question_1.1': 'A',
+        'question_1.2': 'B',
+        'question_1.3': 'C',
+        'question_2.1': 'A',
+        'question_2.2': 'B',
+        'question_2.3': 'C',
+        'question_3.1': 'A',
+        'question_3.2': 'B',
+        'question_3.3': 'C',
+        'question_4.1': 'A',
+        'question_4.2': 'B',
+        'question_4.3': 'C',
+        'question_5.1': 'A',
+        'question_5.2': 'B',
+        'question_5.3': 'C'
     }
     
     # Calculate scores
-    theory_questions = ['1.1', '1.2', '1.3', '2.1', '2.2', '2.3', '3.1', '3.2']
-    practical_questions = ['4.1', '4.2', '5.1', '5.2', '5.3', '6.1', '6.2']
-    
-    for question_id, correct_answer in correct_answers.items():
-        student_answer = data.get(f'question_{question_id}', '')
-        if student_answer == correct_answer:
-            results['correct_answers'] += 1
-            if question_id in theory_questions:
-                results['theory_score'] += 1
-            elif question_id in practical_questions:
-                results['practical_score'] += 1
-        
-        results['total_questions'] += 1
-    
-    # Calculate percentages
-    results['total_score'] = (results['correct_answers'] / results['total_questions']) * 100
-    results['theory_percentage'] = (results['theory_score'] / len(theory_questions)) * 100
-    results['practical_percentage'] = (results['practical_score'] / len(practical_questions)) * 100
-    
-    # Topic scores
-    results['topic_scores'] = {
-        'Systems Technologies': (results['theory_score'] / 3) * 100,
-        'Hardware & Software': (results['theory_score'] / 3) * 100,
-        'Social Implications': (results['theory_score'] / 2) * 100,
-        'Word Processing': (results['practical_score'] / 2) * 100,
-        'Spreadsheets': (results['practical_score'] / 3) * 100,
-        'Database': (results['practical_score'] / 2) * 100
+    total_questions = len(correct_answers)
+    correct_count = 0
+    topic_scores = {
+        'Database Management': 0,
+        'Programming Fundamentals': 0,
+        'Web Development': 0,
+        'System Analysis': 0,
+        'Networking': 0
     }
     
-    data['results'] = results
+    topic_questions = {
+        'Database Management': ['question_1.1', 'question_1.2', 'question_1.3'],
+        'Programming Fundamentals': ['question_2.1', 'question_2.2', 'question_2.3'],
+        'Web Development': ['question_3.1', 'question_3.2', 'question_3.3'],
+        'System Analysis': ['question_4.1', 'question_4.2', 'question_4.3'],
+        'Networking': ['question_5.1', 'question_5.2', 'question_5.3']
+    }
+    
+    for question, correct_answer in correct_answers.items():
+        student_answer = data.get(question, '')
+        if student_answer == correct_answer:
+            correct_count += 1
+            # Add to topic score
+            for topic, questions in topic_questions.items():
+                if question in questions:
+                    topic_scores[topic] += 1
+    
+    # Calculate percentages
+    total_score = (correct_count / total_questions) * 100
+    topic_percentages = {}
+    for topic, score in topic_scores.items():
+        topic_percentages[topic] = (score / len(topic_questions[topic])) * 100
+    
+    data['results'] = {
+        'total_score': total_score,
+        'correct_answers': correct_count,
+        'total_questions': total_questions,
+        'topic_percentages': topic_percentages
+    }
+    
     return data
 
 def update_student_profile(data):
     """Update or create student profile"""
     email = data.get('email', '')
-    if email:
-        if email not in students:
-            students[email] = {
-                'name': data.get('student_name', ''),
-                'email': email,
-                'first_submission': data['submission_time'],
-                'submissions_count': 0,
-                'average_score': 0,
-                'best_score': 0,
-                'weakest_topics': [],
-                'strongest_topics': []
-            }
-        
-        students[email]['submissions_count'] += 1
-        students[email]['last_submission'] = data['submission_time']
-        
-        # Update scores
-        current_score = data['results']['total_score']
-        if current_score > students[email]['best_score']:
-            students[email]['best_score'] = current_score
-        
-        # Calculate average score
-        all_scores = [s['results']['total_score'] for s in submissions 
-                     if s.get('email') == email]
-        students[email]['average_score'] = statistics.mean(all_scores) if all_scores else 0
+    if not email:
+        return
+    
+    if email not in students:
+        students[email] = {
+            'name': data.get('name', ''),
+            'email': email,
+            'submissions': [],
+            'average_score': 0,
+            'best_score': 0,
+            'total_submissions': 0,
+            'last_activity': ''
+        }
+    
+    # Update student data
+    students[email]['submissions'].append({
+        'submission_id': data['submission_id'],
+        'score': data['results']['total_score'],
+        'date': data['submission_time']
+    })
+    
+    students[email]['total_submissions'] = len(students[email]['submissions'])
+    students[email]['last_activity'] = data['submission_time']
+    
+    # Calculate average and best scores
+    scores = [s['score'] for s in students[email]['submissions']]
+    students[email]['average_score'] = sum(scores) / len(scores)
+    students[email]['best_score'] = max(scores)
 
 def update_analytics(data):
     """Update global analytics"""
     analytics['total_submissions'] += 1
     
     # Update daily submissions
-    today = datetime.now().date().isoformat()
-    if today not in analytics['daily_submissions']:
-        analytics['daily_submissions'][today] = 0
-    analytics['daily_submissions'][today] += 1
+    date = data['submission_time'][:10]
+    if date not in analytics['daily_submissions']:
+        analytics['daily_submissions'][date] = 0
+    analytics['daily_submissions'][date] += 1
     
     # Update topic performance
-    topic_scores = data['results']['topic_scores']
-    for topic, score in topic_scores.items():
+    for topic, percentage in data['results']['topic_percentages'].items():
         if topic not in analytics['topic_performance']:
             analytics['topic_performance'][topic] = []
-        analytics['topic_performance'][topic].append(score)
+        analytics['topic_performance'][topic].append(percentage)
     
     # Update average scores
-    for topic, scores in analytics['topic_performance'].items():
-        analytics['average_scores'][topic] = statistics.mean(scores)
+    if 'total_submissions' not in analytics['average_scores']:
+        analytics['average_scores']['total_submissions'] = []
+    analytics['average_scores']['total_submissions'].append(data['results']['total_score'])
 
 def generate_recommendations(data):
     """Generate personalized study recommendations"""
     recommendations = []
-    topic_scores = data['results']['topic_scores']
+    topic_percentages = data['results']['topic_percentages']
     
-    # Find weakest topics
-    weakest_topics = sorted(topic_scores.items(), key=lambda x: x[1])[:2]
-    
-    for topic, score in weakest_topics:
-        if score < 70:
-            recommendations.append(f"Focus on improving your {topic} skills")
+    for topic, percentage in topic_percentages.items():
+        if percentage < 60:
+            recommendations.append(f"Focus on {topic} - you scored {percentage:.1f}%")
+        elif percentage < 80:
+            recommendations.append(f"Practice more {topic} - you scored {percentage:.1f}%")
+        else:
+            recommendations.append(f"Excellent work in {topic} - you scored {percentage:.1f}%")
     
     if data['results']['total_score'] < 60:
-        recommendations.append("Consider reviewing the fundamental concepts")
-    
-    if data['results']['theory_score'] < data['results']['practical_score']:
-        recommendations.append("Practice more theory questions")
+        recommendations.append("Consider reviewing all topics thoroughly")
+    elif data['results']['total_score'] < 80:
+        recommendations.append("Good progress! Focus on your weaker areas")
     else:
-        recommendations.append("Focus on practical application")
+        recommendations.append("Outstanding performance! Keep up the excellent work")
     
     return recommendations
 
 def calculate_student_progress(student_submissions):
-    """Calculate detailed student progress"""
+    """Calculate detailed progress for a student"""
     if not student_submissions:
         return {}
     
-    progress = {
-        'total_attempts': len(student_submissions),
-        'score_trend': [],
-        'topic_improvement': {},
-        'study_recommendations': []
+    # Sort by date
+    sorted_submissions = sorted(student_submissions, key=lambda x: x['submission_time'])
+    
+    progress_data = {
+        'dates': [],
+        'scores': [],
+        'topic_trends': {
+            'Database Management': [],
+            'Programming Fundamentals': [],
+            'Web Development': [],
+            'System Analysis': [],
+            'Networking': []
+        }
     }
     
-    # Sort by submission time
-    sorted_submissions = sorted(student_submissions, 
-                              key=lambda x: x['submission_time'])
-    
-    # Calculate score trend
     for submission in sorted_submissions:
-        progress['score_trend'].append({
-            'date': submission['submission_time'],
-            'score': submission['results']['total_score']
-        })
+        if 'results' in submission:
+            progress_data['dates'].append(submission['submission_time'][:10])
+            progress_data['scores'].append(submission['results']['total_score'])
+            
+            for topic, percentage in submission['results']['topic_percentages'].items():
+                if topic in progress_data['topic_trends']:
+                    progress_data['topic_trends'][topic].append(percentage)
     
-    return progress
+    return progress_data
 
 def export_csv():
     """Export results as CSV"""
-    output = io.StringIO()
-    writer = csv.writer(output)
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
     
     # Write header
-    writer.writerow(['Student Name', 'Email', 'Date', 'Total Score', 
-                    'Theory Score', 'Practical Score', 'Topics'])
+    writer.writerow(['Name', 'Email', 'Score', 'Date'])
     
     # Write data
     for submission in submissions:
-        topics = ', '.join([f"{topic}: {score:.1f}%" 
-                          for topic, score in submission['results']['topic_scores'].items()])
-        writer.writerow([
-            submission.get('student_name', ''),
-            submission.get('email', ''),
-            submission['submission_time'],
-            f"{submission['results']['total_score']:.1f}%",
-            f"{submission['results']['theory_percentage']:.1f}%",
-            f"{submission['results']['practical_percentage']:.1f}%",
-            topics
-        ])
+        if 'results' in submission:
+            writer.writerow([
+                submission.get('name', 'Anonymous'),
+                submission.get('email', ''),
+                f"{submission['results']['total_score']:.1f}%",
+                submission['submission_time'][:10]
+            ])
     
-    output.seek(0)
+    buffer.seek(0)
     return send_file(
-        io.BytesIO(output.getvalue().encode('utf-8')),
+        io.BytesIO(buffer.getvalue().encode('utf-8')),
         mimetype='text/csv',
         as_attachment=True,
         download_name=f'quiz_results_{datetime.now().strftime("%Y%m%d")}.csv'
@@ -403,26 +406,26 @@ def export_pdf():
     doc = SimpleDocTemplate(buffer, pagesize=letter)
     elements = []
     
+    # Add title
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Heading1'],
         fontSize=16,
-        spaceAfter=30
+        spaceAfter=30,
+        alignment=1
     )
-    
-    # Add title
     elements.append(Paragraph("CAT Grade 11 Quiz Results Report", title_style))
-    elements.append(Spacer(1, 12))
+    elements.append(Spacer(1, 20))
     
-    # Add summary table
-    summary_data = [['Student Name', 'Email', 'Total Score', 'Date']]
-    for submission in submissions[-10:]:  # Last 10 submissions
+    # Add summary
+    summary_data = [['Total Submissions', 'Average Score', 'Date']]
+    if submissions:
+        avg_score = sum(s['results']['total_score'] for s in submissions if 'results' in s) / len(submissions)
         summary_data.append([
-            submission.get('student_name', ''),
-            submission.get('email', ''),
-            f"{submission['results']['total_score']:.1f}%",
-            submission['submission_time'][:10]
+            str(len(submissions)),
+            f"{avg_score:.1f}%",
+            datetime.now().strftime("%Y-%m-%d")
         ])
     
     summary_table = Table(summary_data)
@@ -519,104 +522,4 @@ if __name__ == '__main__':
     print(f"🌍 Server will be available on port: {port}")
     
     # Run the server
-=======
-#!/usr/bin/env python3
-"""
-Simple Quiz Server for CAT Grade 11 Tutoring
-This server hosts the quiz and collects student submissions
-"""
-
-from flask import Flask, render_template, request, jsonify, send_from_directory
-import json
-import os
-from datetime import datetime
-import threading
-import webbrowser
-import socket
-
-app = Flask(__name__)
-
-# Store submissions in memory (you can save to file if needed)
-submissions = []
-
-# Get local IP address
-def get_local_ip():
-    try:
-        # Connect to a remote address to get local IP
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-    except:
-        return "127.0.0.1"
-
-@app.route('/')
-def index():
-    return send_from_directory('.', 'CAT_Grade11_Interactive_Quiz.html')
-
-@app.route('/dashboard')
-def dashboard():
-    return send_from_directory('.', 'Tutor_Dashboard.html')
-
-@app.route('/submit_quiz', methods=['POST'])
-def submit_quiz():
-    try:
-        data = request.json
-        data['submission_time'] = datetime.now().isoformat()
-        data['ip_address'] = request.remote_addr
-        
-        submissions.append(data)
-        
-        # Save to file for persistence
-        save_submissions()
-        
-        return jsonify({"success": True, "message": "Quiz submitted successfully!"})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
-@app.route('/get_submissions')
-def get_submissions():
-    return jsonify(submissions)
-
-def save_submissions():
-    """Save submissions to a JSON file"""
-    try:
-        with open('quiz_submissions.json', 'w') as f:
-            json.dump(submissions, f, indent=2)
-    except Exception as e:
-        print(f"Error saving submissions: {e}")
-
-def load_submissions():
-    """Load submissions from JSON file"""
-    global submissions
-    try:
-        if os.path.exists('quiz_submissions.json'):
-            with open('quiz_submissions.json', 'r') as f:
-                submissions = json.load(f)
-    except Exception as e:
-        print(f"Error loading submissions: {e}")
-
-def open_browser():
-    """Open the quiz in default browser"""
-    local_ip = get_local_ip()
-    url = f"http://{local_ip}:5000"
-    print(f"\n🌐 Quiz Server is running!")
-    print(f"📱 Students can access the quiz at: {url}")
-    print(f"📊 You can view results at: {url}/dashboard")
-    print(f"\n💡 Make sure all students are on the same WiFi network!")
-    webbrowser.open(url)
-
-if __name__ == '__main__':
-    # Load existing submissions
-    load_submissions()
-    
-    # Get port from environment variable (for cloud deployment)
-    port = int(os.environ.get('PORT', 5000))
-    
-    print("🚀 Starting CAT Grade 11 Quiz Server...")
-    print(f"🌍 Server will be available on port: {port}")
-    
-    # Run the server
->>>>>>> 19f6c55cb05b175c418cb6d48927185fe0445c97
     app.run(host='0.0.0.0', port=port, debug=False) 
