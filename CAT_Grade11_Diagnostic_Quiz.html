@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -712,4 +713,720 @@
         updateTimer();
     </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAT Grade 11 - Diagnostic Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .student-info {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 3px solid #e9ecef;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #495057;
+        }
+
+        .info-item input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 5px solid #3498db;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section h2::before {
+            content: "📋";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.4em;
+            margin: 20px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .question {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid #3498db;
+        }
+
+        .question strong {
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .options {
+            margin-top: 15px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+
+        .option input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .confidence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .confidence-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .confidence-item input {
+            width: 60px;
+            padding: 5px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .text-area {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .scoring-guide {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .scoring-guide h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .score-item:last-child {
+            border-bottom: none;
+        }
+
+        .score-range {
+            font-weight: bold;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .timer {
+                position: static;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="timer" id="timer">Time: 35:00</div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>CAT Grade 11 - Diagnostic Quiz</h1>
+            <div class="subtitle">Assessment & Preparation Tool</div>
+        </div>
+
+        <div class="student-info">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Student Name:</label>
+                    <input type="text" placeholder="Enter your name">
+                </div>
+                <div class="info-item">
+                    <label>Date:</label>
+                    <input type="date">
+                </div>
+                <div class="info-item">
+                    <label>Test Date:</label>
+                    <input type="text" value="August 26th, 2025" readonly>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>Part A: Theory Questions (15 minutes)</h2>
+                
+                <h3>1. Systems Technologies</h3>
+                
+                <div class="question">
+                    <strong>1.1</strong> What are the four main components of the information processing cycle?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q1.1" value="a">
+                            <label>Input, Output, Processing, Storage</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1.1" value="b">
+                            <label>Input, Output, Processing, Communication</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1.1" value="c">
+                            <label>Input, Output, Storage, Communication</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1.1" value="d">
+                            <label>Input, Output, Processing, Storage, Communication</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <strong>1.2</strong> Which of the following is NOT an input device?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q1.2" value="a">
+                            <label>Touchscreen</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1.2" value="b">
+                            <label>Scanner</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1.2" value="c">
+                            <label>Printer</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1.2" value="d">
+                            <label>Microphone</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <strong>1.3</strong> What is the primary function of RAM?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q1.3" value="a">
+                            <label>Permanent storage</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1.3" value="b">
+                            <label>Temporary storage for running programs</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1.3" value="c">
+                            <label>Processing calculations</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1.3" value="d">
+                            <label>Display output</label>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>2. Hardware & Software</h3>
+                
+                <div class="question">
+                    <strong>2.1</strong> What does SSD stand for?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q2.1" value="a">
+                            <label>Solid State Drive</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2.1" value="b">
+                            <label>Secondary Storage Device</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2.1" value="c">
+                            <label>System Storage Drive</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2.1" value="d">
+                            <label>Software Storage Device</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <strong>2.2</strong> Which storage type is fastest?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q2.2" value="a">
+                            <label>Hard Disk Drive (HDD)</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2.2" value="b">
+                            <label>Solid State Drive (SSD)</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2.2" value="c">
+                            <label>USB Flash Drive</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2.2" value="d">
+                            <label>CD-ROM</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <strong>2.3</strong> What is the purpose of a primary key in a database?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q2.3" value="a">
+                            <label>To make the database look pretty</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2.3" value="b">
+                            <label>To uniquely identify each record</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2.3" value="c">
+                            <label>To store the most important data</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2.3" value="d">
+                            <label>To link to other databases</label>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>3. Social Implications</h3>
+                
+                <div class="question">
+                    <strong>3.1</strong> What is BYOD?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q3.1" value="a">
+                            <label>Bring Your Own Device</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q3.1" value="b">
+                            <label>Buy Your Own Data</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q3.1" value="c">
+                            <label>Build Your Own Database</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q3.1" value="d">
+                            <label>Backup Your Own Documents</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <strong>3.2</strong> Which is a common security threat?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q3.2" value="a">
+                            <label>Malware</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q3.2" value="b">
+                            <label>Hardware failure</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q3.2" value="c">
+                            <label>Software updates</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q3.2" value="d">
+                            <label>File compression</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Part B: Practical Questions (15 minutes)</h2>
+                
+                <h3>4. Word Processing</h3>
+                
+                <div class="question">
+                    <strong>4.1</strong> How do you create a bulleted list in Microsoft Word?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q4.1" value="a">
+                            <label>Press Tab</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q4.1" value="b">
+                            <label>Press Enter</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q4.1" value="c">
+                            <label>Press Ctrl + Shift + L</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q4.1" value="d">
+                            <label>Press Ctrl + B</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <strong>4.2</strong> What is the purpose of "Find and Replace"?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q4.2" value="a">
+                            <label>To change font styles</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q4.2" value="b">
+                            <label>To search for and change specific text</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q4.2" value="c">
+                            <label>To format paragraphs</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q4.2" value="d">
+                            <label>To insert images</label>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>5. Spreadsheets</h3>
+                
+                <div class="question">
+                    <strong>5.1</strong> What does the SUMIF function do?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q5.1" value="a">
+                            <label>Adds all numbers in a range</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5.1" value="b">
+                            <label>Adds numbers that meet a specific condition</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5.1" value="c">
+                            <label>Counts cells with text</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5.1" value="d">
+                            <label>Finds the highest value</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <strong>5.2</strong> What is absolute cell referencing?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q5.2" value="a">
+                            <label>Using $ signs to lock cell references</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5.2" value="b">
+                            <label>Making cells bold</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5.2" value="c">
+                            <label>Adding borders to cells</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5.2" value="d">
+                            <label>Changing cell colors</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <strong>5.3</strong> What does #NULL! error mean?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q5.3" value="a">
+                            <label>Cell is empty</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5.3" value="b">
+                            <label>Invalid cell reference</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5.3" value="c">
+                            <label>Formula error</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5.3" value="d">
+                            <label>Circular reference</label>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>6. Database</h3>
+                
+                <div class="question">
+                    <strong>6.1</strong> What is a field in a database?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q6.1" value="a">
+                            <label>A row of data</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q6.1" value="b">
+                            <label>A column of data</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q6.1" value="c">
+                            <label>A table</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q6.1" value="d">
+                            <label>A query</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <strong>6.2</strong> What view do you use to design a table structure?
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q6.2" value="a">
+                            <label>Datasheet view</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q6.2" value="b">
+                            <label>Design view</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q6.2" value="c">
+                            <label>Form view</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q6.2" value="d">
+                            <label>Report view</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Part C: Self-Assessment (5 minutes)</h2>
+                
+                <h3>Rate your confidence level (1-5) for each topic:</h3>
+                <div class="confidence-grid">
+                    <div class="confidence-item">
+                        <span>Systems Technologies:</span>
+                        <input type="number" min="1" max="5" placeholder="1-5">
+                    </div>
+                    <div class="confidence-item">
+                        <span>Hardware & Software:</span>
+                        <input type="number" min="1" max="5" placeholder="1-5">
+                    </div>
+                    <div class="confidence-item">
+                        <span>Social Implications:</span>
+                        <input type="number" min="1" max="5" placeholder="1-5">
+                    </div>
+                    <div class="confidence-item">
+                        <span>Word Processing:</span>
+                        <input type="number" min="1" max="5" placeholder="1-5">
+                    </div>
+                    <div class="confidence-item">
+                        <span>Spreadsheets:</span>
+                        <input type="number" min="1" max="5" placeholder="1-5">
+                    </div>
+                    <div class="confidence-item">
+                        <span>Database:</span>
+                        <input type="number" min="1" max="5" placeholder="1-5">
+                    </div>
+                </div>
+
+                <h3>What topics do you find most challenging?</h3>
+                <textarea class="text-area" placeholder="Describe the topics you struggle with most..."></textarea>
+
+                <h3>What topics do you feel most confident about?</h3>
+                <textarea class="text-area" placeholder="Describe the topics you feel most comfortable with..."></textarea>
+            </div>
+
+            <div class="scoring-guide">
+                <h3>📊 Scoring Guide</h3>
+                <div class="score-item">
+                    <span class="score-range">0-5 correct</span>
+                    <span>Needs significant review</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-range">6-10 correct</span>
+                    <span>Needs focused practice</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-range">11-15 correct</span>
+                    <span>Good foundation, needs refinement</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-range">16+ correct</span>
+                    <span>Strong understanding, focus on advanced topics</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Timer functionality
+        let timeLeft = 35 * 60; // 35 minutes in seconds
+        
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                alert('Time is up! Please submit your quiz.');
+                return;
+            }
+            
+            timeLeft--;
+            setTimeout(updateTimer, 1000);
+        }
+        
+        updateTimer();
+    </script>
+</body>
+>>>>>>> 19f6c55cb05b175c418cb6d48927185fe0445c97
 </html> 

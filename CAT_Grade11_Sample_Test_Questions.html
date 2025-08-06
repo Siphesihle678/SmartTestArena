@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -708,4 +709,716 @@ Mike         | 65     | 70     | 72</pre>
         }
     </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAT Grade 11 - Sample Test Questions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 5px solid #3498db;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section h2::before {
+            content: "📝";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .theory-section h2::before {
+            content: "🧠";
+        }
+
+        .practical-section h2::before {
+            content: "💻";
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.4em;
+            margin: 20px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .question {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid #3498db;
+        }
+
+        .question strong {
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .options {
+            margin-top: 15px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+
+        .option input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .marks {
+            background: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .data-table {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .data-table pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .answer-key {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .answer-key h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .answer-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .answer-item:last-child {
+            border-bottom: none;
+        }
+
+        .question-number {
+            font-weight: bold;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .marking-guide {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .marking-guide h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .mark-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .mark-item:last-child {
+            border-bottom: none;
+        }
+
+        .mark-range {
+            font-weight: bold;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #ecf0f1;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 30px;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .total-marks {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CAT Grade 11 - Sample Test Questions</h1>
+            <div class="subtitle">Preparation for August 26th, 2025 Test</div>
+        </div>
+
+        <div class="content">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('theory')">Theory Test</button>
+                <button class="nav-tab" onclick="showTab('practical')">Practical Test</button>
+                <button class="nav-tab" onclick="showTab('answers')">Answer Key</button>
+            </div>
+
+            <div id="theory" class="tab-content active">
+                <div class="section theory-section">
+                    <h2>THEORY TEST SAMPLE QUESTIONS</h2>
+                    
+                    <h3>SECTION A: MULTIPLE CHOICE <span class="marks">30 marks</span></h3>
+                    
+                    <div class="question">
+                        <strong>Question 1: Systems Technologies</strong>
+                        <div class="question">
+                            <strong>1.1</strong> The information processing cycle consists of:
+                            <div class="options">
+                                <div class="option">
+                                    <input type="radio" name="t1.1" value="a">
+                                    <label>A) Input, Process, Output, Storage</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t1.1" value="b">
+                                    <label>B) Input, Process, Output, Communication</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t1.1" value="c">
+                                    <label>C) Input, Process, Output, Storage, Communication</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t1.1" value="d">
+                                    <label>D) Input, Process, Output, Memory</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <strong>1.2</strong> Which device is NOT an input device?
+                            <div class="options">
+                                <div class="option">
+                                    <input type="radio" name="t1.2" value="a">
+                                    <label>A) Touchscreen</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t1.2" value="b">
+                                    <label>B) Scanner</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t1.2" value="c">
+                                    <label>C) Printer</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t1.2" value="d">
+                                    <label>D) Microphone</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <strong>Question 2: Hardware</strong>
+                        <div class="question">
+                            <strong>2.1</strong> What is the main advantage of an SSD over an HDD?
+                            <div class="options">
+                                <div class="option">
+                                    <input type="radio" name="t2.1" value="a">
+                                    <label>A) Larger storage capacity</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t2.1" value="b">
+                                    <label>B) Faster data access</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t2.1" value="c">
+                                    <label>C) Lower cost</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t2.1" value="d">
+                                    <label>D) Better compatibility</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <strong>2.2</strong> RAM is classified as:
+                            <div class="options">
+                                <div class="option">
+                                    <input type="radio" name="t2.2" value="a">
+                                    <label>A) Primary storage</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t2.2" value="b">
+                                    <label>B) Secondary storage</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t2.2" value="c">
+                                    <label>C) Tertiary storage</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t2.2" value="d">
+                                    <label>D) External storage</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <strong>Question 3: Social Implications</strong>
+                        <div class="question">
+                            <strong>3.1</strong> BYOD stands for:
+                            <div class="options">
+                                <div class="option">
+                                    <input type="radio" name="t3.1" value="a">
+                                    <label>A) Bring Your Own Device</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t3.1" value="b">
+                                    <label>B) Buy Your Own Data</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t3.1" value="c">
+                                    <label>C) Build Your Own Database</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t3.1" value="d">
+                                    <label>D) Backup Your Own Documents</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <strong>3.2</strong> Which is a common cybersecurity threat?
+                            <div class="options">
+                                <div class="option">
+                                    <input type="radio" name="t3.2" value="a">
+                                    <label>A) Hardware failure</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t3.2" value="b">
+                                    <label>B) Malware</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t3.2" value="c">
+                                    <label>C) Software updates</label>
+                                </div>
+                                <div class="option">
+                                    <input type="radio" name="t3.2" value="d">
+                                    <label>D) File compression</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>SECTION B: SHORT QUESTIONS <span class="marks">20 marks</span></h3>
+                    
+                    <div class="question">
+                        <strong>Question 4:</strong>
+                        <div class="question">
+                            <strong>4.1</strong> Explain the difference between input and output devices. <span class="marks">4 marks</span>
+                            <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; min-height: 100px; border: 2px dashed #dee2e6;">
+                                <em>Write your answer here...</em>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <strong>4.2</strong> Describe two advantages and two disadvantages of using cloud storage. <span class="marks">4 marks</span>
+                            <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; min-height: 100px; border: 2px dashed #dee2e6;">
+                                <em>Write your answer here...</em>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <strong>4.3</strong> What is the purpose of a primary key in a database? <span class="marks">2 marks</span>
+                            <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; min-height: 60px; border: 2px dashed #dee2e6;">
+                                <em>Write your answer here...</em>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <strong>Question 5:</strong>
+                        <div class="question">
+                            <strong>5.1</strong> List three types of storage devices and their typical uses. <span class="marks">6 marks</span>
+                            <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; min-height: 120px; border: 2px dashed #dee2e6;">
+                                <em>Write your answer here...</em>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <strong>5.2</strong> Explain what is meant by "data validation" in databases. <span class="marks">4 marks</span>
+                            <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; min-height: 100px; border: 2px dashed #dee2e6;">
+                                <em>Write your answer here...</em>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="practical" class="tab-content">
+                <div class="section practical-section">
+                    <h2>PRACTICAL TEST SAMPLE QUESTIONS</h2>
+                    
+                    <h3>SECTION A: WORD PROCESSING <span class="marks">25 marks</span></h3>
+                    
+                    <div class="question">
+                        <strong>Question 1: Document Formatting</strong>
+                        <p>Create a document with the following requirements:</p>
+                        <ul style="margin: 15px 0; padding-left: 20px;">
+                            <li>Title: "Computer Applications Technology"</li>
+                            <li>Subtitle: "Grade 11 Study Guide"</li>
+                            <li>Include a bulleted list with 5 key topics</li>
+                            <li>Add page numbers</li>
+                            <li>Use appropriate fonts and formatting</li>
+                        </ul>
+                    </div>
+
+                    <div class="question">
+                        <strong>Question 2: Advanced Features</strong>
+                        <div class="question">
+                            <strong>2.1</strong> Use Find and Replace to change all instances of "computer" to "PC" <span class="marks">5 marks</span>
+                        </div>
+                        <div class="question">
+                            <strong>2.2</strong> Create a table with 3 columns and 4 rows <span class="marks">5 marks</span>
+                        </div>
+                        <div class="question">
+                            <strong>2.3</strong> Add headers and footers to the document <span class="marks">5 marks</span>
+                        </div>
+                    </div>
+
+                    <h3>SECTION B: SPREADSHEETS <span class="marks">25 marks</span></h3>
+                    
+                    <div class="question">
+                        <strong>Question 3: Basic Functions</strong>
+                        <p>Given the following data:</p>
+                        <div class="data-table">
+                            <pre>Student Name | Test 1 | Test 2 | Test 3
+John         | 75     | 82     | 78
+Sarah        | 88     | 85     | 90
+Mike         | 65     | 70     | 72</pre>
+                        </div>
+                        <div class="question">
+                            <strong>3.1</strong> Calculate the average for each student <span class="marks">5 marks</span>
+                        </div>
+                        <div class="question">
+                            <strong>3.2</strong> Use SUMIF to find total marks for students with averages above 80 <span class="marks">5 marks</span>
+                        </div>
+                        <div class="question">
+                            <strong>3.3</strong> Create a chart showing the test performance <span class="marks">5 marks</span>
+                        </div>
+                    </div>
+
+                    <div class="question">
+                        <strong>Question 4: Advanced Functions</strong>
+                        <div class="question">
+                            <strong>4.1</strong> Use absolute cell referencing in a formula <span class="marks">5 marks</span>
+                        </div>
+                        <div class="question">
+                            <strong>4.2</strong> Apply conditional formatting to highlight scores above 80 <span class="marks">5 marks</span>
+                        </div>
+                    </div>
+
+                    <h3>SECTION C: DATABASE <span class="marks">20 marks</span></h3>
+                    
+                    <div class="question">
+                        <strong>Question 5: Table Design</strong>
+                        <div class="question">
+                            <strong>5.1</strong> Create a table called "Students" with appropriate fields and data types <span class="marks">10 marks</span>
+                        </div>
+                        <div class="question">
+                            <strong>5.2</strong> Set up a primary key for the table <span class="marks">5 marks</span>
+                        </div>
+                        <div class="question">
+                            <strong>5.3</strong> Create a simple query to find students with marks above 75 <span class="marks">5 marks</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="answers" class="tab-content">
+                <div class="answer-key">
+                    <h3>✅ ANSWER KEY (THEORY)</h3>
+                    
+                    <h4>SECTION A: MULTIPLE CHOICE</h4>
+                    <div class="answer-item">
+                        <span class="question-number">1.1</span>
+                        <span>C) Input, Process, Output, Storage, Communication</span>
+                    </div>
+                    <div class="answer-item">
+                        <span class="question-number">1.2</span>
+                        <span>C) Printer</span>
+                    </div>
+                    <div class="answer-item">
+                        <span class="question-number">2.1</span>
+                        <span>B) Faster data access</span>
+                    </div>
+                    <div class="answer-item">
+                        <span class="question-number">2.2</span>
+                        <span>A) Primary storage</span>
+                    </div>
+                    <div class="answer-item">
+                        <span class="question-number">3.1</span>
+                        <span>A) Bring Your Own Device</span>
+                    </div>
+                    <div class="answer-item">
+                        <span class="question-number">3.2</span>
+                        <span>B) Malware</span>
+                    </div>
+
+                    <h4>SECTION B: SHORT QUESTIONS</h4>
+                    <div class="answer-item">
+                        <span class="question-number">4.1</span>
+                        <span>Input devices send data TO the computer (keyboard, mouse, scanner)<br>
+                        Output devices receive data FROM the computer (printer, monitor, speakers)</span>
+                    </div>
+                    <div class="answer-item">
+                        <span class="question-number">4.2</span>
+                        <span>Advantages: Access from anywhere, automatic backup, collaboration<br>
+                        Disadvantages: Internet dependency, security concerns, ongoing costs</span>
+                    </div>
+                    <div class="answer-item">
+                        <span class="question-number">4.3</span>
+                        <span>A primary key uniquely identifies each record in a table</span>
+                    </div>
+                    <div class="answer-item">
+                        <span class="question-number">5.1</span>
+                        <span>HDD (permanent storage), SSD (fast storage), USB (portable storage)</span>
+                    </div>
+                    <div class="answer-item">
+                        <span class="question-number">5.2</span>
+                        <span>Data validation ensures data entered meets specific criteria (e.g., numbers only, date format)</span>
+                    </div>
+                </div>
+
+                <div class="marking-guide">
+                    <h3>📋 PRACTICAL MARKING GUIDE</h3>
+                    
+                    <h4>Word Processing (25 marks)</h4>
+                    <div class="mark-item">
+                        <span>Document structure</span>
+                        <span class="mark-range">5 marks</span>
+                    </div>
+                    <div class="mark-item">
+                        <span>Formatting</span>
+                        <span class="mark-range">5 marks</span>
+                    </div>
+                    <div class="mark-item">
+                        <span>Find and Replace</span>
+                        <span class="mark-range">5 marks</span>
+                    </div>
+                    <div class="mark-item">
+                        <span>Table creation</span>
+                        <span class="mark-range">5 marks</span>
+                    </div>
+                    <div class="mark-item">
+                        <span>Headers/Footers</span>
+                        <span class="mark-range">5 marks</span>
+                    </div>
+
+                    <h4>Spreadsheets (25 marks)</h4>
+                    <div class="mark-item">
+                        <span>Basic calculations</span>
+                        <span class="mark-range">10 marks</span>
+                    </div>
+                    <div class="mark-item">
+                        <span>Functions (SUMIF, etc.)</span>
+                        <span class="mark-range">10 marks</span>
+                    </div>
+                    <div class="mark-item">
+                        <span>Charts and formatting</span>
+                        <span class="mark-range">5 marks</span>
+                    </div>
+
+                    <h4>Database (20 marks)</h4>
+                    <div class="mark-item">
+                        <span>Table design</span>
+                        <span class="mark-range">10 marks</span>
+                    </div>
+                    <div class="mark-item">
+                        <span>Primary key</span>
+                        <span class="mark-range">5 marks</span>
+                    </div>
+                    <div class="mark-item">
+                        <span>Query creation</span>
+                        <span class="mark-range">5 marks</span>
+                    </div>
+                </div>
+
+                <div class="total-marks">
+                    <strong>Total: 70 marks</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+>>>>>>> 19f6c55cb05b175c418cb6d48927185fe0445c97
 </html> 

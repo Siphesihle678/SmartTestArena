@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 Flask==2.3.3
 Werkzeug==2.3.7
 reportlab==4.0.4
 openpyxl==3.1.2 
+=======
+Flask==2.3.3
+Werkzeug==2.3.7 
+>>>>>>> 19f6c55cb05b175c418cb6d48927185fe0445c97

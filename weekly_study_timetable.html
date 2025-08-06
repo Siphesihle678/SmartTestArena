@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -600,4 +601,608 @@
         </div>
     </div>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Study Schedule & Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+        }
+        
+        h2 {
+            color: #34495e;
+            font-size: 1.8em;
+            margin: 25px 0 15px 0;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            font-size: 1.4em;
+            margin: 20px 0 10px 0;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+        
+        .tips-section {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .tips-section ol {
+            margin-left: 20px;
+        }
+        
+        .tips-section li {
+            margin-bottom: 8px;
+        }
+        
+        .motivation-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .motivation-section blockquote {
+            font-style: italic;
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        
+        .usage-section {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .timetable {
+            margin: 30px 0;
+        }
+        
+        .day-schedule {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .day-header {
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .time-slot {
+            display: flex;
+            padding: 12px 20px;
+            border-bottom: 1px solid #dee2e6;
+            align-items: center;
+        }
+        
+        .time-slot:last-child {
+            border-bottom: none;
+        }
+        
+        .time {
+            background: #3498db;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            min-width: 120px;
+            text-align: center;
+            margin-right: 20px;
+        }
+        
+        .subject {
+            font-weight: 600;
+            color: #2c3e50;
+            flex-grow: 1;
+        }
+        
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            margin-left: 15px;
+            cursor: pointer;
+        }
+        
+        .homework {
+            background: #e74c3c;
+        }
+        
+        .life-sciences {
+            background: #27ae60;
+        }
+        
+        .accounting {
+            background: #f39c12;
+        }
+        
+        .mathematics {
+            background: #9b59b6;
+        }
+        
+        .physical-sciences {
+            background: #e67e22;
+        }
+        
+        .physics {
+            background: #1abc9c;
+        }
+        
+        .english {
+            background: #34495e;
+        }
+        
+        .sesotho {
+            background: #8e44ad;
+        }
+        
+        .reading {
+            background: #e91e63;
+        }
+        
+        .break-note {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        .legend {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .legend h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+        
+        .productivity-tips {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .productivity-tips h3 {
+            color: #856404;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .productivity-tips ul {
+            margin-left: 20px;
+        }
+        
+        .productivity-tips li {
+            margin-bottom: 8px;
+            color: #856404;
+        }
+        
+        .productivity-tips h4 {
+            color: #856404;
+            font-size: 1.2em;
+            margin: 20px 0 10px 0;
+            border-bottom: 2px solid #ffc107;
+            padding-bottom: 5px;
+        }
+        
+        .productivity-tips p {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .weekend-note {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            color: #0c5460;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+            
+            .checkbox {
+                -webkit-appearance: checkbox;
+                appearance: checkbox;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Weekly Study Schedule & Guide - Boitumelo James</h1>
+        
+        <div class="tips-section">
+            <h2>🎯 Study Tips for Success</h2>
+            <ol>
+                <li>Break your study into focused sessions with short breaks.</li>
+                <li>Start with the subjects you find most difficult.</li>
+                <li>Use active recall and practice testing instead of re-reading.</li>
+                <li>Avoid distractions - study in a clean, quiet space.</li>
+                <li>Stay hydrated and take care of your physical health.</li>
+                <li>Stick to your schedule, but be flexible when needed.</li>
+                <li>Use the checkboxes to track your progress and stay motivated.</li>
+                <li>Morning reading helps improve focus and vocabulary.</li>
+            </ol>
+        </div>
+        
+        <div class="motivation-section">
+            <h2>💪 Motivation Corner</h2>
+            <blockquote>"Success is the sum of small efforts, repeated day in and day out." – Robert Collier</blockquote>
+            <blockquote>"The secret to getting ahead is getting started." – Mark Twain</blockquote>
+            <blockquote>"Don't watch the clock; do what it does. Keep going." – Sam Levenson</blockquote>
+        </div>
+        
+        <div class="usage-section">
+            <h2>📋 How to Use This Timetable</h2>
+            <p>Weekdays focus on <strong>dedicated study sessions</strong> for your core subjects, while <strong>weekends include reading time</strong> for mental stimulation and relaxation.</p>
+            <p>Inside each 2-hour session, <strong>take a 10-minute break after the first 50 minutes</strong> to help you stay focused and retain information.</p>
+            <p><strong>Check the boxes</strong> when you complete each session to track your progress and stay motivated.</p>
+            <p>Weekends are designed for lighter study loads with more focus on review, preparation, and reading for pleasure.</p>
+        </div>
+        
+        <div class="productivity-tips">
+            <h3>🚀 Study Techniques & How to Implement Them</h3>
+            
+            <h4>⏰ Pomodoro Technique</h4>
+            <p><strong>What it is:</strong> A time management method that uses focused work sessions followed by short breaks.</p>
+            <p><strong>How to implement:</strong></p>
+            <ul>
+                <li>Set a timer for 25 minutes of focused study</li>
+                <li>Work on one subject only during this time</li>
+                <li>Take a 5-minute break when the timer goes off</li>
+                <li>After 4 Pomodoros, take a longer 15-30 minute break</li>
+                <li>Use your phone timer or download a Pomodoro app</li>
+            </ul>
+            
+            <h4>🧠 Active Recall</h4>
+            <p><strong>What it is:</strong> Testing yourself on material instead of passively re-reading notes.</p>
+            <p><strong>How to implement:</strong></p>
+            <ul>
+                <li>Cover your notes and try to write down what you remember</li>
+                <li>Create flashcards for key concepts and test yourself</li>
+                <li>Explain concepts out loud as if teaching someone else</li>
+                <li>Use practice questions and past exam papers</li>
+                <li>Quiz yourself on formulas, definitions, and key points</li>
+            </ul>
+            
+            <h4>🔄 Spaced Repetition</h4>
+            <p><strong>What it is:</strong> Reviewing information at increasing intervals to strengthen memory.</p>
+            <p><strong>How to implement:</strong></p>
+            <ul>
+                <li>Review new material within 24 hours of learning it</li>
+                <li>Review again after 3 days, then 1 week, then 2 weeks</li>
+                <li>Use apps like Anki or Quizlet for digital spaced repetition</li>
+                <li>Create a review schedule in your planner</li>
+                <li>Focus more time on material you find difficult</li>
+            </ul>
+            
+            <h4>📝 Note-Taking Methods</h4>
+            <p><strong>Cornell Method:</strong></p>
+            <ul>
+                <li>Divide your page into three sections: main notes, key points, and summary</li>
+                <li>Write main notes during class/study</li>
+                <li>Add key points and questions in the margin</li>
+                <li>Write a summary at the bottom after class</li>
+            </ul>
+            
+            <p><strong>Mind Mapping:</strong></p>
+            <ul>
+                <li>Start with a central topic in the middle of the page</li>
+                <li>Branch out with related concepts and ideas</li>
+                <li>Use colors and images to make connections</li>
+                <li>Great for subjects like Life Sciences and Physics</li>
+            </ul>
+            
+            <h4>🎯 Environment Optimization</h4>
+            <p><strong>Study Space Setup:</strong></p>
+            <ul>
+                <li>Choose a quiet, well-lit area with minimal distractions</li>
+                <li>Keep your study materials organized and easily accessible</li>
+                <li>Have water and healthy snacks nearby</li>
+                <li>Ensure comfortable seating and good posture</li>
+                <li>Remove or silence your phone during study sessions</li>
+            </ul>
+            
+            <h4>📱 Digital Detox During Study</h4>
+            <p><strong>How to implement:</strong></p>
+            <ul>
+                <li>Put your phone on airplane mode or silent</li>
+                <li>Use apps like Forest or Focus@Will to block distractions</li>
+                <li>Close unnecessary browser tabs and social media</li>
+                <li>Set specific times to check messages (during breaks only)</li>
+                <li>Tell friends and family your study schedule so they know when not to disturb you</li>
+            </ul>
+            
+            <h4>✅ Progress Tracking</h4>
+            <p><strong>How to use the checkboxes effectively:</strong></p>
+            <ul>
+                <li>Check off each completed session immediately</li>
+                <li>Review your weekly progress every Sunday</li>
+                <li>Celebrate small wins and completed sessions</li>
+                <li>If you miss sessions, don't give up - just continue with the next one</li>
+                <li>Use the visual progress to stay motivated and build momentum</li>
+            </ul>
+        </div>
+        
+        <div class="timetable">
+            <h2>📅 Weekly Study Timetable</h2>
+            
+            <div class="day-schedule">
+                <div class="day-header">Monday</div>
+                <div class="time-slot">
+                    <div class="time homework">14:30 - 16:00</div>
+                    <div class="subject">📝 Homework</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time mathematics">16:00 - 18:00</div>
+                    <div class="subject">📊 Mathematics</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time physics">18:00 - 20:00</div>
+                    <div class="subject">⚡ Physics</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+            </div>
+            
+            <div class="day-schedule">
+                <div class="day-header">Tuesday</div>
+                <div class="time-slot">
+                    <div class="time homework">17:30 - 19:00</div>
+                    <div class="subject">📝 Homework</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time life-sciences">19:00 - 21:00</div>
+                    <div class="subject">🔬 Life Sciences</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time accounting">21:00 - 23:00</div>
+                    <div class="subject">💰 Accounting</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+            </div>
+            
+            <div class="day-schedule">
+                <div class="day-header">Wednesday</div>
+                <div class="time-slot">
+                    <div class="time homework">17:30 - 19:00</div>
+                    <div class="subject">📝 Homework</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time mathematics">19:00 - 21:00</div>
+                    <div class="subject">📊 Mathematics</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time physics">21:00 - 23:00</div>
+                    <div class="subject">⚡ Physics</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+            </div>
+            
+            <div class="day-schedule">
+                <div class="day-header">Thursday</div>
+                <div class="time-slot">
+                    <div class="time homework">17:30 - 19:00</div>
+                    <div class="subject">📝 Homework</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time life-sciences">19:00 - 21:00</div>
+                    <div class="subject">🔬 Life Sciences</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time accounting">21:00 - 23:00</div>
+                    <div class="subject">💰 Accounting</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+            </div>
+            
+            <div class="day-schedule">
+                <div class="day-header">Friday</div>
+                <div class="time-slot">
+                    <div class="time homework">14:30 - 16:00</div>
+                    <div class="subject">📝 Homework</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time mathematics">16:00 - 18:00</div>
+                    <div class="subject">📊 Mathematics</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time english">18:00 - 20:00</div>
+                    <div class="subject">📖 English</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+            </div>
+            
+            <div class="day-schedule">
+                <div class="day-header">Saturday</div>
+                <div class="weekend-note">
+                    <strong>Weekend Focus:</strong> Lighter study load with emphasis on review and preparation
+                </div>
+                <div class="time-slot">
+                    <div class="time reading">10:00 - 11:30</div>
+                    <div class="subject">📖 Extended Reading Time</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time physics">14:00 - 16:00</div>
+                    <div class="subject">⚡ Physics Review & Practice</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time life-sciences">16:00 - 18:00</div>
+                    <div class="subject">🔬 Life Sciences Review</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+            </div>
+            
+            <div class="day-schedule">
+                <div class="day-header">Sunday</div>
+                <div class="weekend-note">
+                    <strong>Weekend Focus:</strong> Preparation for the week ahead and light revision
+                </div>
+                <div class="time-slot">
+                    <div class="time reading">10:00 - 11:30</div>
+                    <div class="subject">📖 Extended Reading Time</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time mathematics">14:00 - 16:00</div>
+                    <div class="subject">📊 Mathematics Review & Prep</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+                <div class="time-slot">
+                    <div class="time accounting">16:00 - 18:00</div>
+                    <div class="subject">💰 Accounting Review</div>
+                    <input type="checkbox" class="checkbox">
+                </div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <h4>🎨 Color Legend</h4>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #e74c3c;"></div>
+                <span>Homework</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #27ae60;"></div>
+                <span>Life Sciences</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f39c12;"></div>
+                <span>Accounting</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #9b59b6;"></div>
+                <span>Mathematics</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #e67e22;"></div>
+                <span>Physical Sciences</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #1abc9c;"></div>
+                <span>Physics</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #34495e;"></div>
+                <span>English</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #8e44ad;"></div>
+                <span>Sesotho</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #e91e63;"></div>
+                <span>Reading Time</span>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; color: #7f8c8d; font-style: italic;">
+            <p>💡 Remember: Take a 10-minute break after the first 50 minutes of each 2-hour study session!</p>
+            <p>✅ Check off completed sessions to track your progress and stay motivated!</p>
+            <p>📱 Print this page or save as PDF for easy access throughout your week.</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px;">
+            <h3 style="margin-bottom: 15px;">💝 Made with Love for Tumi</h3>
+            <p style="font-size: 1.1em; margin-bottom: 10px;"><strong>Created by Siphesihle Moloi</strong></p>
+            <p style="margin-bottom: 15px;">Aspiring Software Engineer & Mechatronic Engineer</p>
+            <p style="margin-bottom: 20px;">💌 Feel free to send any improvements or suggestions to make this timetable even better!</p>
+            
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                <h4 style="margin-bottom: 10px;">📞 Custom Timetables Available</h4>
+                <p style="margin-bottom: 10px;">Want a personalized study timetable like this one?</p>
+                <p style="font-weight: bold; font-size: 1.1em;">📱 WhatsApp: 0719750057</p>
+                <p style="font-size: 0.9em; margin-top: 10px;">Custom timetables available for a fee</p>
+            </div>
+        </div>
+    </div>
+</body>
+>>>>>>> 19f6c55cb05b175c418cb6d48927185fe0445c97
 </html> 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Python
 __pycache__/
 *.py[cod]
@@ -22,4 +23,30 @@ Thumbs.db
 
 # Local files
 quiz_submissions.json
+=======
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local files
+quiz_submissions.json
+>>>>>>> 19f6c55cb05b175c418cb6d48927185fe0445c97
 *.log 
