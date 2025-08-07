@@ -7,6 +7,8 @@ Deployed to Railway - Updated for production
 from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Float, ForeignKey, JSON, Boolean
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime, timedelta
@@ -222,6 +224,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount static files
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
 # Add rate limiting
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -268,7 +273,11 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
 # Basic endpoints
 @app.get("/")
 def read_root():
-    return {"message": "SmartTest Arena Enhanced Server is running!", "status": "healthy"}
+    return FileResponse("frontend/index.html")
+
+@app.get("/app")
+def serve_app():
+    return FileResponse("frontend/index.html")
 
 @app.get("/health")
 def health_check():
