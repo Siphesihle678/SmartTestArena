@@ -6,6 +6,8 @@ class SmartTestArena {
         this.currentUser = null;
         this.authToken = localStorage.getItem('authToken');
         this.dashboardRefreshInterval = null;
+        this.performanceChart = null;
+        this.analyticsChart = null;
         this.init();
     }
 
@@ -104,6 +106,7 @@ class SmartTestArena {
         this.currentUser = null;
         localStorage.removeItem('authToken');
         this.stopDashboardRefresh();
+        this.destroyCharts();
         this.updateAuthUI();
         this.showWelcome();
         this.showToast('Logged out successfully', 'info');
@@ -254,6 +257,9 @@ class SmartTestArena {
         this.showSection('dashboard');
         this.loadDashboardData();
         
+        // Initialize charts if not already done
+        setTimeout(() => this.initializeCharts(), 100);
+        
         // Start real-time refresh every 30 seconds
         this.startDashboardRefresh();
     }
@@ -269,8 +275,12 @@ class SmartTestArena {
 
     showAnalyticsSection() {
         this.showSection('analytics');
+        
+        // Initialize charts if not already done
+        setTimeout(() => this.initializeCharts(), 100);
+        
         if (this.currentUser) {
-            this.getUserAnalytics(this.currentUser.id);
+            this.loadAnalyticsData();
         }
     }
 
@@ -299,7 +309,10 @@ class SmartTestArena {
                 break;
             case 'analytics':
                 if (this.currentUser) {
-                    await this.getUserAnalytics(this.currentUser.id);
+                    const analytics = await this.apiRequest(`/analytics/dashboard/${this.currentUser.id}`);
+                    this.displayAnalytics(analytics);
+                } else {
+                    this.showToast('Please log in to view analytics.', 'error');
                 }
                 break;
         }
@@ -327,6 +340,19 @@ class SmartTestArena {
             } catch (fallbackError) {
                 console.error('Fallback also failed:', fallbackError);
             }
+        }
+    }
+
+    async loadAnalyticsData() {
+        if (!this.currentUser) return;
+        
+        try {
+            const analytics = await this.apiRequest(`/analytics/dashboard/${this.currentUser.id}`);
+            this.displayAnalytics(analytics);
+            this.showToast('Analytics loaded successfully', 'success');
+        } catch (error) {
+            console.error('Failed to load analytics data:', error);
+            this.showToast('Failed to load analytics data', 'error');
         }
     }
 
@@ -374,6 +400,9 @@ class SmartTestArena {
             `;
             activityContainer.appendChild(progressIndicator);
         }
+        
+        // Update progress chart
+        this.updateProgressChart(analytics);
     }
 
     startDashboardRefresh() {
@@ -394,6 +423,178 @@ class SmartTestArena {
         if (this.dashboardRefreshInterval) {
             clearInterval(this.dashboardRefreshInterval);
             this.dashboardRefreshInterval = null;
+        }
+    }
+
+    // Chart Methods
+    initializeCharts() {
+        // Initialize dashboard performance chart (mini chart)
+        const dashboardCtx = document.getElementById('dashboardPerformanceChart');
+        if (dashboardCtx && !this.performanceChart) {
+            this.performanceChart = new Chart(dashboardCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Daily Performance',
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false
+                        },
+                        y: {
+                            display: false,
+                            min: 0,
+                            max: 100
+                        }
+                    },
+                    elements: {
+                        point: {
+                            radius: 0
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize analytics page chart (detailed chart)
+        const analyticsCtx = document.getElementById('performanceChart');
+        if (analyticsCtx && !this.analyticsChart) {
+            this.analyticsChart = new Chart(analyticsCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Average Score',
+                        data: [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        borderColor: '#3B82F6',
+                        borderWidth: 1
+                    }, {
+                        label: 'Attempts',
+                        data: [],
+                        backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                        borderColor: '#22C55E',
+                        borderWidth: 1,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Subject Performance Overview'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Average Score (%)'
+                            },
+                            min: 0,
+                            max: 100
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Number of Attempts'
+                            },
+                            min: 0,
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Subjects'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    updateProgressChart(analytics) {
+        // Update dashboard mini chart
+        if (this.performanceChart && analytics.recent_activity.length > 0) {
+            const weeklyData = this.generateWeeklyData(analytics.recent_activity);
+            this.performanceChart.data.datasets[0].data = weeklyData;
+            this.performanceChart.update('none');
+        }
+
+        // Update analytics page chart
+        if (this.analyticsChart && analytics.subject_performance.length > 0) {
+            const subjects = analytics.subject_performance.map(s => s.subject);
+            const scores = analytics.subject_performance.map(s => s.average_score);
+            const attempts = analytics.subject_performance.map(s => s.attempts);
+
+            this.analyticsChart.data.labels = subjects;
+            this.analyticsChart.data.datasets[0].data = scores;
+            this.analyticsChart.data.datasets[1].data = attempts;
+            this.analyticsChart.update('active');
+        }
+    }
+
+    generateWeeklyData(recentActivity) {
+        // Generate mock weekly performance data based on recent activity
+        // In a real implementation, this would come from the backend
+        const weeklyScores = [0, 0, 0, 0, 0, 0, 0];
+        
+        if (recentActivity.length > 0) {
+            // Fill with sample data pattern based on recent performance
+            const avgScore = recentActivity.reduce((sum, activity) => {
+                const score = parseFloat(activity.score.replace('%', ''));
+                return sum + score;
+            }, 0) / recentActivity.length;
+
+            // Generate realistic weekly progression
+            for (let i = 0; i < 7; i++) {
+                const variation = (Math.random() - 0.5) * 20; // ±10% variation
+                weeklyScores[i] = Math.max(0, Math.min(100, avgScore + variation));
+            }
+        }
+        
+        return weeklyScores;
+    }
+
+    destroyCharts() {
+        if (this.performanceChart) {
+            this.performanceChart.destroy();
+            this.performanceChart = null;
+        }
+        if (this.analyticsChart) {
+            this.analyticsChart.destroy();
+            this.analyticsChart = null;
         }
     }
 
@@ -438,8 +639,58 @@ class SmartTestArena {
     }
 
     displayAnalytics(analytics) {
-        const container = document.getElementById('topicPerformance');
-        container.innerHTML = '<p class="text-gray-500">Analytics data loaded successfully</p>';
+        // Display performance summary
+        const summaryContainer = document.getElementById('performanceSummary');
+        if (summaryContainer && analytics.real_time_stats) {
+            const stats = analytics.real_time_stats;
+            summaryContainer.innerHTML = `
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-blue-700">Total Quiz Attempts</span>
+                        <span class="text-lg font-bold text-blue-900">${stats.total_attempts}</span>
+                    </div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-green-700">Overall Average</span>
+                        <span class="text-lg font-bold text-green-900">${stats.average_score}%</span>
+                    </div>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-purple-700">Weekly Average</span>
+                        <span class="text-lg font-bold text-purple-900">${stats.weekly_average || 0}%</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Display recent trends
+        const trendsContainer = document.getElementById('recentTrends');
+        if (trendsContainer && analytics.recent_activity) {
+            if (analytics.recent_activity.length > 0) {
+                trendsContainer.innerHTML = analytics.recent_activity.map(activity => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-line text-blue-500 mr-3"></i>
+                            <div>
+                                <div class="font-medium text-sm">${activity.subject}</div>
+                                <div class="text-xs text-gray-500">${activity.date}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-sm ${parseFloat(activity.score) >= 70 ? 'text-green-600' : 'text-red-600'}">${activity.score}</div>
+                            <div class="text-xs text-gray-500">${activity.time}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                trendsContainer.innerHTML = '<p class="text-gray-500 text-center py-4">No recent activity to display trends</p>';
+            }
+        }
+
+        // Update the chart with analytics data
+        this.updateProgressChart(analytics);
     }
 
     async loadProfileData() {

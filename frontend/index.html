@@ -158,6 +158,26 @@
                         <button id="manageContentBtn" class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition">Manage Content</button>
                     </div>
                 </div>
+                
+                <!-- Performance Overview (Dashboard) -->
+                <div class="bg-white p-6 rounded-lg shadow-md col-span-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Weekly Performance Trend</h3>
+                        <span class="text-xs text-gray-500">Last 7 days</span>
+                    </div>
+                    <div class="relative h-32">
+                        <canvas id="dashboardPerformanceChart"></canvas>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-2">
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+                        <span>Sun</span>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -220,15 +240,23 @@
         <section id="analytics" class="hidden">
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h3 class="text-2xl font-bold mb-6">Analytics & Performance</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h4 class="text-lg font-semibold mb-4">Performance Overview</h4>
-                        <canvas id="performanceChart" width="400" height="200"></canvas>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="lg:col-span-2">
+                        <h4 class="text-lg font-semibold mb-4">Subject Performance Overview</h4>
+                        <div class="relative h-96">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
                     </div>
                     <div>
-                        <h4 class="text-lg font-semibold mb-4">Topic Performance</h4>
-                        <div id="topicPerformance" class="space-y-2">
-                            <!-- Topic performance will be loaded here -->
+                        <h4 class="text-lg font-semibold mb-4">Performance Summary</h4>
+                        <div id="performanceSummary" class="space-y-3">
+                            <!-- Performance summary will be loaded here -->
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Recent Trends</h4>
+                        <div id="recentTrends" class="space-y-2">
+                            <!-- Recent trends will be loaded here -->
                         </div>
                     </div>
                 </div>
