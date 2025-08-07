@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Dashboard - CAT Quiz System</title>
+    <title>SmartTest Arena - Analytics Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -14,76 +14,68 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            color: #333;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
+            padding: 20px;
         }
 
         .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-            color: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
             padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
         .header h1 {
-            font-size: 2.5em;
+            color: #2c3e50;
+            font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .header .subtitle {
-            font-size: 1.2em;
-            opacity: 0.9;
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
         }
 
         .nav-tabs {
-            background: #f8f9fa;
-            padding: 0 30px;
-            border-bottom: 3px solid #e9ecef;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
-        .nav-tab {
-            display: inline-block;
+        .tab-btn {
+            background: none;
+            border: none;
             padding: 15px 25px;
+            margin: 0 5px;
+            border-radius: 10px;
             cursor: pointer;
-            border-bottom: 3px solid transparent;
+            font-size: 1rem;
             transition: all 0.3s ease;
-            font-weight: bold;
-            color: #495057;
+            color: #7f8c8d;
         }
 
-        .nav-tab.active {
-            color: #3498db;
-            border-bottom-color: #3498db;
-            background: white;
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
-        .nav-tab:hover {
-            color: #3498db;
-        }
-
-        .content {
-            padding: 30px;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
+        .tab-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
         }
 
         .stats-grid {
@@ -94,218 +86,246 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-            color: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
             padding: 25px;
-            border-radius: 12px;
             text-align: center;
-            box-shadow: 0 8px 25px rgba(39,174,96,0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
         }
 
-        .stat-card h3 {
-            font-size: 1.2em;
-            margin-bottom: 10px;
-            opacity: 0.9;
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
 
-        .stat-card .value {
-            font-size: 2.5em;
+        .stat-number {
+            font-size: 2.5rem;
             font-weight: bold;
-            margin-bottom: 5px;
+            color: #3498db;
+            margin-bottom: 10px;
         }
 
-        .stat-card .change {
-            font-size: 0.9em;
-            opacity: 0.8;
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1rem;
         }
 
-        .chart-container {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin: 20px 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        .charts-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .chart-container h3 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-        }
-
-        .chart-grid {
+        .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
             gap: 30px;
         }
 
-        .performance-table {
+        .chart-container {
             background: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin: 20px 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        .performance-table h3 {
+        .chart-title {
+            text-align: center;
             color: #2c3e50;
             margin-bottom: 20px;
-            font-size: 1.5em;
+            font-size: 1.2rem;
         }
 
-        .table-container {
-            overflow-x: auto;
+        .performance-table {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        th {
-            background: #f8f9fa;
-            font-weight: bold;
-            color: #495057;
-        }
-
-        tr:hover {
-            background: #f8f9fa;
-        }
-
-        .score-high {
-            color: #27ae60;
-            font-weight: bold;
-        }
-
-        .score-medium {
-            color: #f39c12;
-            font-weight: bold;
-        }
-
-        .score-low {
-            color: #e74c3c;
-            font-weight: bold;
-        }
-
-        .export-buttons {
-            margin: 20px 0;
-            text-align: center;
+        .table-header h3 {
+            color: #2c3e50;
         }
 
         .export-btn {
-            background: #3498db;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 25px;
             cursor: pointer;
-            margin: 0 10px;
+            font-size: 0.9rem;
             transition: all 0.3s ease;
         }
 
         .export-btn:hover {
-            background: #2980b9;
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .performance-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .performance-table th,
+        .performance-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .performance-table th {
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .performance-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .score-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .score-excellent {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .score-good {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .score-average {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .score-poor {
+            background: #f8d7da;
+            color: #721c24;
         }
 
         .leaderboard {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin: 20px 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .leaderboard h3 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.5em;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .leaderboard-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            margin: 10px 0;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid #3498db;
+            padding: 15px 0;
+            border-bottom: 1px solid #ecf0f1;
         }
 
-        .leaderboard-rank {
-            font-size: 1.5em;
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
-            color: #3498db;
-            min-width: 40px;
+            margin-right: 15px;
         }
 
-        .leaderboard-info {
+        .rank-1 {
+            background: #ffd700;
+            color: #333;
+        }
+
+        .rank-2 {
+            background: #c0c0c0;
+            color: #333;
+        }
+
+        .rank-3 {
+            background: #cd7f32;
+            color: white;
+        }
+
+        .rank-other {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        .user-info {
             flex: 1;
-            margin-left: 15px;
         }
 
-        .leaderboard-name {
+        .user-name {
             font-weight: bold;
             color: #2c3e50;
         }
 
-        .leaderboard-email {
-            font-size: 0.9em;
-            color: #6c757d;
-        }
-
-        .leaderboard-score {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #27ae60;
-        }
-
-        .refresh-btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .refresh-btn:hover {
-            background: #229954;
+        .user-score {
+            color: #7f8c8d;
+            font-size: 0.9rem;
         }
 
         .loading {
             text-align: center;
-            padding: 40px;
-            color: #6c757d;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
         }
 
         @media (max-width: 768px) {
             .container {
-                margin: 10px;
-                border-radius: 10px;
+                padding: 10px;
             }
             
             .header h1 {
-                font-size: 2em;
+                font-size: 2rem;
             }
             
-            .chart-grid {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .charts-grid {
                 grid-template-columns: 1fr;
             }
             
-            .nav-tab {
-                padding: 10px 15px;
-                font-size: 0.9em;
+            .performance-table {
+                overflow-x: auto;
             }
         }
     </style>
@@ -314,265 +334,229 @@
     <div class="container">
         <div class="header">
             <h1>📊 Analytics Dashboard</h1>
-            <div class="subtitle">Real-time Performance Analytics & Insights</div>
+            <p>Comprehensive performance tracking and insights</p>
         </div>
 
         <div class="nav-tabs">
-            <div class="nav-tab active" onclick="showTab('overview')">📈 Overview</div>
-            <div class="nav-tab" onclick="showTab('performance')">🎯 Performance</div>
-            <div class="nav-tab" onclick="showTab('students')">👥 Students</div>
-            <div class="nav-tab" onclick="showTab('topics')">📚 Topics</div>
-            <div class="nav-tab" onclick="showTab('leaderboard')">🏆 Leaderboard</div>
+            <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
+            <button class="tab-btn" onclick="showTab('performance')">Performance</button>
+            <button class="tab-btn" onclick="showTab('trends')">Trends</button>
+            <button class="tab-btn" onclick="showTab('leaderboard')">Leaderboard</button>
         </div>
 
-        <div class="content">
-            <!-- Overview Tab -->
-            <div id="overview" class="tab-content active">
-                <button class="refresh-btn" onclick="loadAnalytics()">🔄 Refresh Data</button>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Total Submissions</h3>
-                        <div class="value" id="totalSubmissions">0</div>
-                        <div class="change" id="submissionsChange">+0 today</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Average Score</h3>
-                        <div class="value" id="averageScore">0%</div>
-                        <div class="change" id="scoreChange">+0% this week</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Active Students</h3>
-                        <div class="value" id="activeStudents">0</div>
-                        <div class="change" id="studentsChange">+0 this week</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Completion Rate</h3>
-                        <div class="value" id="completionRate">0%</div>
-                        <div class="change" id="completionChange">+0% this week</div>
-                    </div>
+        <div id="overview" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalQuizzes">0</div>
+                    <div class="stat-label">Total Quizzes Taken</div>
                 </div>
-
-                <div class="chart-grid">
-                    <div class="chart-container">
-                        <h3>📊 Daily Submissions</h3>
-                        <canvas id="submissionsChart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <h3>📈 Score Distribution</h3>
-                        <canvas id="scoreDistributionChart"></canvas>
-                    </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="averageScore">0%</div>
+                    <div class="stat-label">Average Score</div>
                 </div>
-
-                <div class="export-buttons">
-                    <button class="export-btn" onclick="exportData('csv')">📊 Export CSV</button>
-                    <button class="export-btn" onclick="exportData('pdf')">📄 Export PDF</button>
-                    <button class="export-btn" onclick="exportData('excel')">📈 Export Excel</button>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalTime">0h</div>
+                    <div class="stat-label">Total Time Spent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="topTopic">-</div>
+                    <div class="stat-label">Best Performing Topic</div>
                 </div>
             </div>
 
-            <!-- Performance Tab -->
-            <div id="performance" class="tab-content">
-                <div class="chart-container">
-                    <h3>🎯 Topic Performance Overview</h3>
-                    <canvas id="topicPerformanceChart"></canvas>
-                </div>
-
-                <div class="performance-table">
-                    <h3>📋 Detailed Performance Metrics</h3>
-                    <div class="table-container">
-                        <table id="performanceTable">
-                            <thead>
-                                <tr>
-                                    <th>Topic</th>
-                                    <th>Average Score</th>
-                                    <th>Total Attempts</th>
-                                    <th>Success Rate</th>
-                                    <th>Trend</th>
-                                </tr>
-                            </thead>
-                            <tbody id="performanceTableBody">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Students Tab -->
-            <div id="students" class="tab-content">
-                <div class="chart-container">
-                    <h3>👥 Student Performance Distribution</h3>
-                    <canvas id="studentPerformanceChart"></canvas>
-                </div>
-
-                <div class="performance-table">
-                    <h3>📊 Individual Student Analytics</h3>
-                    <div class="table-container">
-                        <table id="studentsTable">
-                            <thead>
-                                <tr>
-                                    <th>Student Name</th>
-                                    <th>Email</th>
-                                    <th>Submissions</th>
-                                    <th>Average Score</th>
-                                    <th>Best Score</th>
-                                    <th>Last Activity</th>
-                                </tr>
-                            </thead>
-                            <tbody id="studentsTableBody">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Topics Tab -->
-            <div id="topics" class="tab-content">
-                <div class="chart-grid">
+            <div class="charts-section">
+                <h2 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">📈 Performance Analytics</h2>
+                <div class="charts-grid">
                     <div class="chart-container">
-                        <h3>📚 Topic Difficulty Analysis</h3>
-                        <canvas id="topicDifficultyChart"></canvas>
+                        <div class="chart-title">Score Distribution</div>
+                        <canvas id="scoreChart"></canvas>
                     </div>
                     <div class="chart-container">
-                        <h3>📈 Topic Improvement Trends</h3>
-                        <canvas id="topicTrendsChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="performance-table">
-                    <h3>📋 Topic-Specific Analytics</h3>
-                    <div class="table-container">
-                        <table id="topicsTable">
-                            <thead>
-                                <tr>
-                                    <th>Topic</th>
-                                    <th>Questions</th>
-                                    <th>Correct Answers</th>
-                                    <th>Accuracy Rate</th>
-                                    <th>Common Mistakes</th>
-                                </tr>
-                            </thead>
-                            <tbody id="topicsTableBody">
-                            </tbody>
-                        </table>
+                        <div class="chart-title">Topic Performance</div>
+                        <canvas id="topicChart"></canvas>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Leaderboard Tab -->
-            <div id="leaderboard" class="tab-content">
-                <div class="leaderboard">
-                    <h3>🏆 Top Performers (This Week)</h3>
-                    <div id="leaderboardList">
-                        <div class="loading">Loading leaderboard...</div>
+        <div id="performance" class="tab-content" style="display: none;">
+            <div class="performance-table">
+                <div class="table-header">
+                    <h3>📋 Recent Quiz Performance</h3>
+                    <button class="export-btn" onclick="exportData()">Export Data</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Topic</th>
+                            <th>Score</th>
+                            <th>Time</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="performanceTable">
+                        <tr>
+                            <td colspan="5" class="loading">Loading performance data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="trends" class="tab-content" style="display: none;">
+            <div class="charts-section">
+                <h2 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">📈 Performance Trends</h2>
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-title">Score Progression</div>
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">Daily Activity</div>
+                        <canvas id="activityChart"></canvas>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="chart-container">
-                    <h3>📊 Score Distribution</h3>
-                    <canvas id="leaderboardChart"></canvas>
+        <div id="leaderboard" class="tab-content" style="display: none;">
+            <div class="leaderboard">
+                <h2 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">🏆 Leaderboard</h2>
+                <div id="leaderboardList">
+                    <div class="loading">Loading leaderboard...</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let analyticsData = {};
-        let charts = {};
+        const API_BASE = 'http://localhost:8001';
+        let scoreChart, topicChart, trendChart, activityChart;
 
-        // Tab functionality
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAnalytics();
+            initializeCharts();
+        });
+
         function showTab(tabName) {
             // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.style.display = 'none');
             
             // Show selected tab content
-            document.getElementById(tabName).classList.add('active');
+            document.getElementById(tabName).style.display = 'block';
             
-            // Add active class to clicked tab
+            // Update active tab button
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             
-            // Load data for the tab
-            if (tabName === 'leaderboard') {
+            // Load specific data for the tab
+            if (tabName === 'performance') {
+                loadPerformanceData();
+            } else if (tabName === 'trends') {
+                loadTrendsData();
+            } else if (tabName === 'leaderboard') {
                 loadLeaderboard();
             }
         }
 
-        // Load analytics data
         async function loadAnalytics() {
             try {
-                const response = await fetch('/get_analytics');
-                analyticsData = await response.json();
-                updateDashboard();
+                // Mock data for demonstration
+                const mockData = {
+                    totalQuizzes: 15,
+                    averageScore: 78,
+                    totalTime: 2.5,
+                    topTopic: "Systems Technologies",
+                    scoreDistribution: [2, 3, 5, 3, 2],
+                    topicPerformance: [85, 72, 68, 90, 75, 82],
+                    recentPerformance: [
+                        { date: "2025-08-06", topic: "Systems Technologies", score: 85, time: "12:30", confidence: 8 },
+                        { date: "2025-08-05", topic: "Hardware & Software", score: 72, time: "15:45", confidence: 6 },
+                        { date: "2025-08-04", topic: "Database", score: 90, time: "18:20", confidence: 9 },
+                        { date: "2025-08-03", topic: "Word Processing", score: 78, time: "14:15", confidence: 7 },
+                        { date: "2025-08-02", topic: "Spreadsheets", score: 82, time: "16:30", confidence: 8 }
+                    ]
+                };
+                
+                // Update stats
+                document.getElementById('totalQuizzes').textContent = mockData.totalQuizzes;
+                document.getElementById('averageScore').textContent = mockData.averageScore + '%';
+                document.getElementById('totalTime').textContent = mockData.totalTime + 'h';
+                document.getElementById('topTopic').textContent = mockData.topTopic;
+                
+                // Update charts
+                updateCharts(mockData);
+                
             } catch (error) {
                 console.error('Error loading analytics:', error);
+                showError('Failed to load analytics data');
             }
         }
 
-        // Update dashboard with data
-        function updateDashboard() {
-            updateStats();
-            updateCharts();
-            updateTables();
-        }
+        function initializeCharts() {
+            // Score Distribution Chart
+            const scoreCtx = document.getElementById('scoreChart').getContext('2d');
+            scoreChart = new Chart(scoreCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['90-100%', '80-89%', '70-79%', '60-69%', 'Below 60%'],
+                    datasets: [{
+                        data: [2, 3, 5, 3, 2],
+                        backgroundColor: [
+                            '#27ae60',
+                            '#3498db',
+                            '#f39c12',
+                            '#e67e22',
+                            '#e74c3c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
 
-        // Update statistics
-        function updateStats() {
-            const data = analyticsData;
-            
-            document.getElementById('totalSubmissions').textContent = data.total_submissions || 0;
-            document.getElementById('averageScore').textContent = 
-                calculateAverageScore(data.average_scores) + '%';
-            document.getElementById('activeStudents').textContent = 
-                Object.keys(data.topic_performance || {}).length;
-            document.getElementById('completionRate').textContent = 
-                calculateCompletionRate(data) + '%';
-        }
+            // Topic Performance Chart
+            const topicCtx = document.getElementById('topicChart').getContext('2d');
+            topicChart = new Chart(topicCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Systems Technologies', 'Hardware & Software', 'Social Implications', 'Word Processing', 'Spreadsheets', 'Database'],
+                    datasets: [{
+                        label: 'Average Score (%)',
+                        data: [85, 72, 68, 90, 75, 82],
+                        backgroundColor: '#3498db'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
 
-        // Calculate average score
-        function calculateAverageScore(scores) {
-            if (!scores || Object.keys(scores).length === 0) return 0;
-            const values = Object.values(scores);
-            return Math.round(values.reduce((a, b) => a + b, 0) / values.length);
-        }
-
-        // Calculate completion rate
-        function calculateCompletionRate(data) {
-            // This would be calculated based on your business logic
-            return Math.round(Math.random() * 20 + 80); // Placeholder
-        }
-
-        // Update charts
-        function updateCharts() {
-            updateSubmissionsChart();
-            updateScoreDistributionChart();
-            updateTopicPerformanceChart();
-        }
-
-        // Update submissions chart
-        function updateSubmissionsChart() {
-            const ctx = document.getElementById('submissionsChart');
-            if (charts.submissions) {
-                charts.submissions.destroy();
-            }
-
-            const data = analyticsData.daily_submissions || {};
-            const labels = Object.keys(data).slice(-7); // Last 7 days
-            const values = labels.map(date => data[date] || 0);
-
-            charts.submissions = new Chart(ctx, {
+            // Trend Chart
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(trendCtx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
                     datasets: [{
-                        label: 'Daily Submissions',
-                        data: values,
+                        label: 'Average Score',
+                        data: [65, 72, 78, 82],
                         borderColor: '#3498db',
                         backgroundColor: 'rgba(52, 152, 219, 0.1)',
                         tension: 0.4
@@ -580,11 +564,29 @@
                 },
                 options: {
                     responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
                         }
-                    },
+                    }
+                }
+            });
+
+            // Activity Chart
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            activityChart = new Chart(activityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Quizzes Taken',
+                        data: [3, 2, 4, 1, 3, 2, 0],
+                        backgroundColor: '#9b59b6'
+                    }]
+                },
+                options: {
+                    responsive: true,
                     scales: {
                         y: {
                             beginAtZero: true
@@ -594,192 +596,91 @@
             });
         }
 
-        // Update score distribution chart
-        function updateScoreDistributionChart() {
-            const ctx = document.getElementById('scoreDistributionChart');
-            if (charts.scoreDistribution) {
-                charts.scoreDistribution.destroy();
-            }
+        function updateCharts(data) {
+            // Update score distribution
+            scoreChart.data.datasets[0].data = data.scoreDistribution;
+            scoreChart.update();
 
-            // Generate sample distribution data
-            const labels = ['0-20%', '21-40%', '41-60%', '61-80%', '81-100%'];
-            const data = [5, 15, 30, 35, 15]; // Sample distribution
-
-            charts.scoreDistribution = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: [
-                            '#e74c3c',
-                            '#f39c12',
-                            '#f1c40f',
-                            '#27ae60',
-                            '#2ecc71'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                        }
-                    }
-                }
-            });
+            // Update topic performance
+            topicChart.data.datasets[0].data = data.topicPerformance;
+            topicChart.update();
         }
 
-        // Update topic performance chart
-        function updateTopicPerformanceChart() {
-            const ctx = document.getElementById('topicPerformanceChart');
-            if (charts.topicPerformance) {
-                charts.topicPerformance.destroy();
-            }
+        function loadPerformanceData() {
+            const performanceTable = document.getElementById('performanceTable');
+            const mockData = [
+                { date: "2025-08-06", topic: "Systems Technologies", score: 85, time: "12:30", confidence: 8 },
+                { date: "2025-08-05", topic: "Hardware & Software", score: 72, time: "15:45", confidence: 6 },
+                { date: "2025-08-04", topic: "Database", score: 90, time: "18:20", confidence: 9 },
+                { date: "2025-08-03", topic: "Word Processing", score: 78, time: "14:15", confidence: 7 },
+                { date: "2025-08-02", topic: "Spreadsheets", score: 82, time: "16:30", confidence: 8 }
+            ];
 
-            const data = analyticsData.average_scores || {};
-            const labels = Object.keys(data);
-            const values = Object.values(data);
-
-            charts.topicPerformance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Average Score (%)',
-                        data: values,
-                        backgroundColor: 'rgba(52, 152, 219, 0.8)',
-                        borderColor: '#3498db',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                }
-            });
+            performanceTable.innerHTML = mockData.map(item => `
+                <tr>
+                    <td>${item.date}</td>
+                    <td>${item.topic}</td>
+                    <td><span class="score-badge ${getScoreClass(item.score)}">${item.score}%</span></td>
+                    <td>${item.time}</td>
+                    <td>${item.confidence}/10</td>
+                </tr>
+            `).join('');
         }
 
-        // Update tables
-        function updateTables() {
-            updatePerformanceTable();
-            updateStudentsTable();
+        function loadTrendsData() {
+            // Charts are already initialized, just update if needed
+            console.log('Trends data loaded');
         }
 
-        // Update performance table
-        function updatePerformanceTable() {
-            const tbody = document.getElementById('performanceTableBody');
-            const data = analyticsData.average_scores || {};
-            
-            tbody.innerHTML = '';
-            
-            Object.entries(data).forEach(([topic, score]) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${topic}</td>
-                    <td class="${getScoreClass(score)}">${score.toFixed(1)}%</td>
-                    <td>${Math.floor(Math.random() * 50 + 10)}</td>
-                    <td>${Math.floor(Math.random() * 20 + 70)}%</td>
-                    <td>${getTrendIcon()}</td>
-                `;
-                tbody.appendChild(row);
-            });
+        function loadLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            const mockLeaderboard = [
+                { rank: 1, name: "Sarah Johnson", score: 95 },
+                { rank: 2, name: "Michael Chen", score: 92 },
+                { rank: 3, name: "Emily Davis", score: 89 },
+                { rank: 4, name: "David Wilson", score: 87 },
+                { rank: 5, name: "Lisa Brown", score: 85 }
+            ];
+
+            leaderboardList.innerHTML = mockLeaderboard.map(user => `
+                <div class="leaderboard-item">
+                    <div class="rank ${getRankClass(user.rank)}">${user.rank}</div>
+                    <div class="user-info">
+                        <div class="user-name">${user.name}</div>
+                        <div class="user-score">${user.score}%</div>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // Update students table
-        async function updateStudentsTable() {
-            try {
-                const response = await fetch('/get_students');
-                const students = await response.json();
-                
-                const tbody = document.getElementById('studentsTableBody');
-                tbody.innerHTML = '';
-                
-                Object.values(students).forEach(student => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${student.name || 'Anonymous'}</td>
-                        <td>${student.email}</td>
-                        <td>${student.submissions_count || 0}</td>
-                        <td class="${getScoreClass(student.average_score)}">${(student.average_score || 0).toFixed(1)}%</td>
-                        <td class="${getScoreClass(student.best_score)}">${(student.best_score || 0).toFixed(1)}%</td>
-                        <td>${formatDate(student.last_submission)}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } catch (error) {
-                console.error('Error loading students:', error);
-            }
-        }
-
-        // Load leaderboard
-        async function loadLeaderboard() {
-            try {
-                const response = await fetch('/get_leaderboard');
-                const leaderboard = await response.json();
-                
-                const container = document.getElementById('leaderboardList');
-                container.innerHTML = '';
-                
-                leaderboard.forEach((student, index) => {
-                    const item = document.createElement('div');
-                    item.className = 'leaderboard-item';
-                    item.innerHTML = `
-                        <div class="leaderboard-rank">#${index + 1}</div>
-                        <div class="leaderboard-info">
-                            <div class="leaderboard-name">${student.name}</div>
-                            <div class="leaderboard-email">${student.email}</div>
-                        </div>
-                        <div class="leaderboard-score">${student.score.toFixed(1)}%</div>
-                    `;
-                    container.appendChild(item);
-                });
-            } catch (error) {
-                console.error('Error loading leaderboard:', error);
-            }
-        }
-
-        // Helper functions
         function getScoreClass(score) {
-            if (score >= 80) return 'score-high';
-            if (score >= 60) return 'score-medium';
-            return 'score-low';
+            if (score >= 90) return 'score-excellent';
+            if (score >= 80) return 'score-good';
+            if (score >= 70) return 'score-average';
+            return 'score-poor';
         }
 
-        function getTrendIcon() {
-            const trends = ['📈', '📊', '📉'];
-            return trends[Math.floor(Math.random() * trends.length)];
+        function getRankClass(rank) {
+            if (rank === 1) return 'rank-1';
+            if (rank === 2) return 'rank-2';
+            if (rank === 3) return 'rank-3';
+            return 'rank-other';
         }
 
-        function formatDate(dateString) {
-            if (!dateString) return 'Never';
-            return new Date(dateString).toLocaleDateString();
+        function exportData() {
+            // Mock export functionality
+            alert('Export functionality will be implemented soon!');
         }
 
-        // Export data
-        function exportData(format) {
-            const url = `/export_results?format=${format}`;
-            window.open(url, '_blank');
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.stats-grid'));
         }
 
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            loadAnalytics();
-            
-            // Auto-refresh every 30 seconds
-            setInterval(loadAnalytics, 30000);
-        });
+        // Auto-refresh analytics every 60 seconds
+        setInterval(loadAnalytics, 60000);
     </script>
 </body>
 </html> 

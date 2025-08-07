@@ -19,3 +19,6 @@ test_*.py
 migrate_db.py
 create_*.py
 deploy_*.py
+
+# Force Railway to use enhanced_server.py
+!enhanced_server.py

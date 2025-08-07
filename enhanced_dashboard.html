@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartTest Arena - Enhanced Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .feature-card p {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .feature-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .charts-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .recent-activity {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 15px;
+        }
+
+        .activity-content h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .activity-content p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 SmartTest Arena Enhanced Dashboard</h1>
+            <p>Integrated Learning Platform with CAT Quiz Features</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSubjects">0</div>
+                <div class="stat-label">Total Subjects</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalTopics">0</div>
+                <div class="stat-label">Total Topics</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalQuestions">0</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeUsers">0</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card" onclick="navigateTo('subjects')">
+                <h3>📚 Subject Management</h3>
+                <p>Create and manage different subjects including CAT Grade 11. Add new subjects, view existing ones, and organize your curriculum.</p>
+                <button class="feature-btn">Manage Subjects</button>
+            </div>
+            
+            <div class="feature-card" onclick="navigateTo('topics')">
+                <h3>🎯 Topic Management</h3>
+                <p>Organize topics within subjects. Create topics like Systems Technologies, Hardware & Software, and more for CAT.</p>
+                <button class="feature-btn">Manage Topics</button>
+            </div>
+            
+            <div class="feature-card" onclick="navigateTo('questions')">
+                <h3>❓ Question Bank</h3>
+                <p>Create and manage questions for each topic. Build comprehensive question banks with multiple choice questions.</p>
+                <button class="feature-btn">Manage Questions</button>
+            </div>
+            
+            <div class="feature-card" onclick="navigateTo('analytics')">
+                <h3>📊 Analytics Dashboard</h3>
+                <p>View detailed analytics and performance metrics. Track student progress, topic performance, and trends.</p>
+                <button class="feature-btn">View Analytics</button>
+            </div>
+            
+            <div class="feature-card" onclick="navigateTo('profiles')">
+                <h3>👤 Student Profiles</h3>
+                <p>Manage student profiles and track individual performance. View detailed progress reports and recommendations.</p>
+                <button class="feature-btn">View Profiles</button>
+            </div>
+            
+            <div class="feature-card" onclick="navigateTo('quiz')">
+                <h3>🎮 Interactive Quiz</h3>
+                <p>Take interactive quizzes with real-time feedback. Practice with CAT questions and track your performance.</p>
+                <button class="feature-btn">Start Quiz</button>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <h2 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">📈 Performance Analytics</h2>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Subject Distribution</div>
+                    <canvas id="subjectChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Topic Performance</div>
+                    <canvas id="topicChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-activity">
+            <h2 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">🕒 Recent Activity</h2>
+            <div id="activityList">
+                <div class="loading">Loading recent activity...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8001';
+        let subjectChart, topicChart;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            initializeCharts();
+        });
+
+        async function loadDashboardData() {
+            try {
+                // Load subjects
+                const subjectsResponse = await fetch(`${API_BASE}/subjects`);
+                const subjects = await subjectsResponse.json();
+                
+                // Load topics
+                const topicsResponse = await fetch(`${API_BASE}/topics`);
+                const topics = await topicsResponse.json();
+                
+                // Load questions
+                const questionsResponse = await fetch(`${API_BASE}/questions`);
+                const questions = await questionsResponse.json();
+                
+                // Update stats
+                document.getElementById('totalSubjects').textContent = subjects.length;
+                document.getElementById('totalTopics').textContent = topics.length;
+                document.getElementById('totalQuestions').textContent = questions.length;
+                document.getElementById('activeUsers').textContent = '5'; // Mock data
+                
+                // Update charts
+                updateCharts(subjects, topics);
+                
+                // Load recent activity
+                loadRecentActivity();
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+
+        function initializeCharts() {
+            // Subject Distribution Chart
+            const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+            subjectChart = new Chart(subjectCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['CAT Grade 11'],
+                    datasets: [{
+                        data: [1],
+                        backgroundColor: [
+                            '#3498db',
+                            '#e74c3c',
+                            '#f39c12',
+                            '#27ae60',
+                            '#9b59b6'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Topic Performance Chart
+            const topicCtx = document.getElementById('topicChart').getContext('2d');
+            topicChart = new Chart(topicCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Systems Technologies', 'Hardware & Software', 'Social Implications', 'Word Processing', 'Spreadsheets', 'Database'],
+                    datasets: [{
+                        label: 'Questions per Topic',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: '#3498db'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts(subjects, topics) {
+            // Update subject chart
+            if (subjects.length > 0) {
+                subjectChart.data.labels = subjects.map(s => s.name);
+                subjectChart.data.datasets[0].data = [1]; // Each subject has 1 entry
+                subjectChart.update();
+            }
+
+            // Update topic chart with mock data
+            const topicData = [5, 8, 3, 12, 10, 6]; // Mock question counts
+            topicChart.data.datasets[0].data = topicData;
+            topicChart.update();
+        }
+
+        function loadRecentActivity() {
+            const activityList = document.getElementById('activityList');
+            const activities = [
+                {
+                    icon: '📚',
+                    title: 'CAT Subject Created',
+                    description: 'Computer Applications Technology subject initialized with 6 topics'
+                },
+                {
+                    icon: '🎯',
+                    title: 'Topics Added',
+                    description: '6 CAT topics created including Systems Technologies and Database'
+                },
+                {
+                    icon: '❓',
+                    title: 'Question Bank Ready',
+                    description: 'Question bank structure prepared for CAT topics'
+                },
+                {
+                    icon: '📊',
+                    title: 'Analytics Enabled',
+                    description: 'Performance tracking and analytics system activated'
+                }
+            ];
+
+            activityList.innerHTML = activities.map(activity => `
+                <div class="activity-item">
+                    <div class="activity-icon">${activity.icon}</div>
+                    <div class="activity-content">
+                        <h4>${activity.title}</h4>
+                        <p>${activity.description}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function navigateTo(feature) {
+            const routes = {
+                'subjects': 'subject_manager.html',
+                'topics': 'topic_manager.html',
+                'questions': 'question_manager.html',
+                'analytics': 'analytics_dashboard.html',
+                'profiles': 'student_profiles.html',
+                'quiz': 'interactive_quiz.html'
+            };
+
+            if (routes[feature]) {
+                window.location.href = routes[feature];
+            } else {
+                alert('Feature coming soon!');
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.stats-grid'));
+        }
+
+        // Auto-refresh dashboard every 30 seconds
+        setInterval(loadDashboardData, 30000);
+    </script>
+</body>
+</html> 

@@ -154,7 +154,7 @@ app.add_middleware(
 # Basic endpoints
 @app.get("/")
 def read_root():
-    return {"message": "SmartTest Arena Enhanced Server is running!"}
+    return {"message": "SmartTest Arena Enhanced Server is running!", "status": "healthy"}
 
 @app.get("/health")
 def health_check():
@@ -371,5 +371,5 @@ def initialize_cat_data(db: SessionLocal = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8001))
-    print(f"🚀 Starting SmartTest Arena Enhanced Server on port {port}...")
+    print(f"🚀 Starting SmartTest Arena Enhanced Server on port {port}... - Railway Production Ready!")
     uvicorn.run(app, host="0.0.0.0", port=port) 
