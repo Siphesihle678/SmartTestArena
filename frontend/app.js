@@ -165,6 +165,15 @@ class SmartTestArena {
             this.showLoginForm();
         });
         
+        // Navigation links
+        document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = e.target.getAttribute('href').substring(1);
+                this.showSection(section);
+            });
+        });
+        
         // Dashboard actions
         document.getElementById('startQuizBtn').addEventListener('click', () => this.showQuizSection());
         document.getElementById('viewAnalyticsBtn').addEventListener('click', () => this.showAnalyticsSection());
@@ -260,6 +269,13 @@ class SmartTestArena {
         }
     }
 
+    showProfileSection() {
+        this.showSection('profile');
+        if (this.currentUser) {
+            this.loadProfileData();
+        }
+    }
+
     showAppropriateSection() {
         if (this.currentUser) {
             this.showDashboard();
@@ -301,15 +317,35 @@ class SmartTestArena {
         const container = document.getElementById('subjectsList');
         container.innerHTML = '';
         
+        if (subjects.length === 0) {
+            container.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <p class="text-gray-500 mb-4">No subjects available yet.</p>
+                    ${this.currentUser && this.currentUser.is_tutor ? 
+                        '<button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Add Your First Subject</button>' : 
+                        '<p class="text-sm text-gray-400">Subjects will appear here when tutors add them.</p>'
+                    }
+                </div>
+            `;
+            return;
+        }
+        
         subjects.forEach(subject => {
             const card = document.createElement('div');
-            card.className = 'subject-card';
+            card.className = 'bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition cursor-pointer';
             card.innerHTML = `
-                <h4>${subject.name}</h4>
-                <p>${subject.description || 'No description available'}</p>
-                <div class="subject-stats">
-                    <span>Grade: ${subject.grade_level || 'N/A'}</span>
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-xl font-semibold text-gray-800">${subject.name}</h4>
+                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">${subject.grade_level || 'All Grades'}</span>
+                </div>
+                <p class="text-gray-600 mb-4">${subject.description || 'No description available'}</p>
+                <div class="flex justify-between text-sm text-gray-500">
                     <span>Curriculum: ${subject.curriculum || 'N/A'}</span>
+                    <span>Created: ${new Date(subject.created_at).toLocaleDateString()}</span>
+                </div>
+                <div class="mt-4 flex space-x-2">
+                    <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition">View Topics</button>
+                    <button class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition">Start Quiz</button>
                 </div>
             `;
             container.appendChild(card);
@@ -319,6 +355,32 @@ class SmartTestArena {
     displayAnalytics(analytics) {
         const container = document.getElementById('topicPerformance');
         container.innerHTML = '<p class="text-gray-500">Analytics data loaded successfully</p>';
+    }
+
+    async loadProfileData() {
+        if (!this.currentUser) return;
+        
+        try {
+            const profileInfo = document.getElementById('profileInfo');
+            const recommendations = document.getElementById('recommendations');
+            
+            // Display user info
+            profileInfo.innerHTML = `
+                <div class="space-y-2">
+                    <div><strong>Name:</strong> ${this.currentUser.name}</div>
+                    <div><strong>Email:</strong> ${this.currentUser.email}</div>
+                    <div><strong>Role:</strong> ${this.currentUser.is_tutor ? 'Tutor' : 'Student'}</div>
+                    <div><strong>Member since:</strong> ${new Date(this.currentUser.created_at).toLocaleDateString()}</div>
+                </div>
+            `;
+            
+            // Display recommendations
+            recommendations.innerHTML = '<p class="text-gray-500">Profile recommendations will appear here</p>';
+            
+            this.showToast('Profile loaded successfully', 'success');
+        } catch (error) {
+            console.error('Failed to load profile data:', error);
+        }
     }
 
     // Utility Methods
