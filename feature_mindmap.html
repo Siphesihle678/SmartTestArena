@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartTest Arena - Feature Mindmap</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .mindmap-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .mindmap-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .status-working { border-left: 4px solid #10B981; }
+        .status-partial { border-left: 4px solid #F59E0B; }
+        .status-broken { border-left: 4px solid #EF4444; }
+        .status-pending { border-left: 4px solid #6B7280; }
+        .feature-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .feature-details.show {
+            max-height: 500px;
+        }
+        .connection-line {
+            position: absolute;
+            background: #E5E7EB;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-brain text-blue-600 mr-3"></i>
+                SmartTest Arena Feature Mindmap
+            </h1>
+            <p class="text-xl text-gray-600">Interactive overview of all app features and their current status</p>
+            
+            <!-- Legend -->
+            <div class="flex justify-center space-x-6 mt-6">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                    <span class="text-sm">Working</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
+                    <span class="text-sm">Partial</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-red-500 rounded mr-2"></div>
+                    <span class="text-sm">Broken</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-gray-500 rounded mr-2"></div>
+                    <span class="text-sm">Pending</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Mindmap -->
+        <div class="relative">
+            <!-- Central Node -->
+            <div class="flex justify-center mb-12">
+                <div class="mindmap-node status-working bg-blue-600 text-white p-6 rounded-lg shadow-lg text-center max-w-md">
+                    <i class="fas fa-graduation-cap text-3xl mb-3"></i>
+                    <h2 class="text-2xl font-bold">SmartTest Arena</h2>
+                    <p class="text-blue-100 mt-2">Integrated Learning Platform</p>
+                    <div class="mt-4 text-sm">
+                        <span class="bg-green-500 px-2 py-1 rounded">Core Platform Working</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Categories -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                
+                <!-- Authentication & User Management -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-working bg-green-600 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-user-shield text-xl mb-2"></i>
+                                <h3 class="font-bold">Authentication</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-check text-green-300"></i> User Registration</li>
+                                <li><i class="fas fa-check text-green-300"></i> Login/Logout</li>
+                                <li><i class="fas fa-check text-green-300"></i> JWT Token Management</li>
+                                <li><i class="fas fa-check text-green-300"></i> Password Hashing</li>
+                                <li><i class="fas fa-check text-green-300"></i> Role-based Access (Student/Tutor)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Frontend Interface -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-working bg-green-600 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-desktop text-xl mb-2"></i>
+                                <h3 class="font-bold">Frontend UI</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-check text-green-300"></i> Responsive Design</li>
+                                <li><i class="fas fa-check text-green-300"></i> Navigation System</li>
+                                <li><i class="fas fa-check text-green-300"></i> Toast Notifications</li>
+                                <li><i class="fas fa-check text-green-300"></i> Loading States</li>
+                                <li><i class="fas fa-check text-green-300"></i> Modern UI/UX</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backend API -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-working bg-green-600 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-server text-xl mb-2"></i>
+                                <h3 class="font-bold">Backend API</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-check text-green-300"></i> FastAPI Framework</li>
+                                <li><i class="fas fa-check text-green-300"></i> RESTful Endpoints</li>
+                                <li><i class="fas fa-check text-green-300"></i> CORS Support</li>
+                                <li><i class="fas fa-check text-green-300"></i> Rate Limiting</li>
+                                <li><i class="fas fa-check text-green-300"></i> Static File Serving</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-working bg-green-600 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-database text-xl mb-2"></i>
+                                <h3 class="font-bold">Database</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-check text-green-300"></i> SQLAlchemy ORM</li>
+                                <li><i class="fas fa-check text-green-300"></i> PostgreSQL (Railway)</li>
+                                <li><i class="fas fa-check text-green-300"></i> User Management</li>
+                                <li><i class="fas fa-check text-green-300"></i> Data Models</li>
+                                <li><i class="fas fa-check text-green-300"></i> Migration System</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Row - Core Features -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+                
+                <!-- Dashboard -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-partial bg-yellow-500 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-tachometer-alt text-xl mb-2"></i>
+                                <h3 class="font-bold">Dashboard</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-check text-green-300"></i> Navigation Access</li>
+                                <li><i class="fas fa-check text-green-300"></i> Basic Stats Display</li>
+                                <li><i class="fas fa-times text-red-300"></i> Real-time Analytics</li>
+                                <li><i class="fas fa-times text-red-300"></i> Progress Charts</li>
+                                <li><i class="fas fa-times text-red-300"></i> Recent Activity</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subjects Management -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-partial bg-yellow-500 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-book text-xl mb-2"></i>
+                                <h3 class="font-bold">Subjects</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-check text-green-300"></i> Display Subjects</li>
+                                <li><i class="fas fa-check text-green-300"></i> Beautiful Cards</li>
+                                <li><i class="fas fa-times text-red-300"></i> Add New Subjects</li>
+                                <li><i class="fas fa-times text-red-300"></i> Edit Subjects</li>
+                                <li><i class="fas fa-times text-red-300"></i> Subject Categories</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz System -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-pending bg-gray-500 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-question-circle text-xl mb-2"></i>
+                                <h3 class="font-bold">Quiz System</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-times text-red-300"></i> Quiz Creation</li>
+                                <li><i class="fas fa-times text-red-300"></i> Question Types</li>
+                                <li><i class="fas fa-times text-red-300"></i> Timer System</li>
+                                <li><i class="fas fa-times text-red-300"></i> Auto-grading</li>
+                                <li><i class="fas fa-times text-red-300"></i> Results Display</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Third Row - Advanced Features -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-8">
+                
+                <!-- Analytics -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-pending bg-gray-500 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-chart-line text-xl mb-2"></i>
+                                <h3 class="font-bold">Analytics</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-check text-green-300"></i> Basic Display</li>
+                                <li><i class="fas fa-times text-red-300"></i> Performance Charts</li>
+                                <li><i class="fas fa-times text-red-300"></i> Progress Tracking</li>
+                                <li><i class="fas fa-times text-red-300"></i> Detailed Reports</li>
+                                <li><i class="fas fa-times text-red-300"></i> Export Data</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Management -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-partial bg-yellow-500 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-user text-xl mb-2"></i>
+                                <h3 class="font-bold">Profile</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-check text-green-300"></i> Basic Info Display</li>
+                                <li><i class="fas fa-check text-green-300"></i> User Details</li>
+                                <li><i class="fas fa-times text-red-300"></i> Profile Editing</li>
+                                <li><i class="fas fa-times text-red-300"></i> Avatar Upload</li>
+                                <li><i class="fas fa-times text-red-300"></i> Preferences</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Management -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-pending bg-gray-500 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-edit text-xl mb-2"></i>
+                                <h3 class="font-bold">Content Management</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-times text-red-300"></i> Topic Creation</li>
+                                <li><i class="fas fa-times text-red-300"></i> Question Bank</li>
+                                <li><i class="fas fa-times text-red-300"></i> File Uploads</li>
+                                <li><i class="fas fa-times text-red-300"></i> Content Moderation</li>
+                                <li><i class="fas fa-times text-red-300"></i> Version Control</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Optimization -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-working bg-green-600 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-mobile-alt text-xl mb-2"></i>
+                                <h3 class="font-bold">Mobile</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-check text-green-300"></i> Responsive Design</li>
+                                <li><i class="fas fa-check text-green-300"></i> Touch-friendly UI</li>
+                                <li><i class="fas fa-check text-green-300"></i> Mobile Navigation</li>
+                                <li><i class="fas fa-check text-green-300"></i> Optimized Loading</li>
+                                <li><i class="fas fa-check text-green-300"></i> Cross-platform</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fourth Row - Deployment & Infrastructure -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+                
+                <!-- Deployment -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-working bg-green-600 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-rocket text-xl mb-2"></i>
+                                <h3 class="font-bold">Deployment</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-check text-green-300"></i> Railway Deployment</li>
+                                <li><i class="fas fa-check text-green-300"></i> GitHub Integration</li>
+                                <li><i class="fas fa-check text-green-300"></i> Auto-deploy</li>
+                                <li><i class="fas fa-check text-green-300"></i> Environment Variables</li>
+                                <li><i class="fas fa-check text-green-300"></i> SSL Certificate</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-working bg-green-600 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-shield-alt text-xl mb-2"></i>
+                                <h3 class="font-bold">Security</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-check text-green-300"></i> JWT Authentication</li>
+                                <li><i class="fas fa-check text-green-300"></i> Password Hashing</li>
+                                <li><i class="fas fa-check text-green-300"></i> CORS Protection</li>
+                                <li><i class="fas fa-check text-green-300"></i> Rate Limiting</li>
+                                <li><i class="fas fa-check text-green-300"></i> Input Validation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testing -->
+                <div class="space-y-4">
+                    <div class="mindmap-node status-pending bg-gray-500 text-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-vial text-xl mb-2"></i>
+                                <h3 class="font-bold">Testing</h3>
+                            </div>
+                            <button class="toggle-details text-white hover:text-blue-200">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="feature-details mt-3 text-sm">
+                            <ul class="space-y-1">
+                                <li><i class="fas fa-times text-red-300"></i> Unit Tests</li>
+                                <li><i class="fas fa-times text-red-300"></i> Integration Tests</li>
+                                <li><i class="fas fa-times text-red-300"></i> API Testing</li>
+                                <li><i class="fas fa-times text-red-300"></i> Frontend Testing</li>
+                                <li><i class="fas fa-times text-red-300"></i> Performance Tests</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="mt-12 bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-chart-pie text-blue-600 mr-2"></i>
+                Feature Status Summary
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="text-center p-4 bg-green-100 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600" id="workingCount">0</div>
+                    <div class="text-sm text-green-700">Working</div>
+                </div>
+                <div class="text-center p-4 bg-yellow-100 rounded-lg">
+                    <div class="text-2xl font-bold text-yellow-600" id="partialCount">0</div>
+                    <div class="text-sm text-yellow-700">Partial</div>
+                </div>
+                <div class="text-center p-4 bg-red-100 rounded-lg">
+                    <div class="text-2xl font-bold text-red-600" id="brokenCount">0</div>
+                    <div class="text-sm text-red-700">Broken</div>
+                </div>
+                <div class="text-center p-4 bg-gray-100 rounded-lg">
+                    <div class="text-2xl font-bold text-gray-600" id="pendingCount">0</div>
+                    <div class="text-sm text-gray-700">Pending</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Items -->
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-tasks text-blue-600 mr-2"></i>
+                Priority Action Items
+            </h3>
+            <div class="space-y-3">
+                <div class="flex items-center p-3 bg-red-50 rounded-lg">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                    <div>
+                        <div class="font-semibold text-red-700">High Priority</div>
+                        <div class="text-sm text-red-600">Implement Quiz System - Core functionality missing</div>
+                    </div>
+                </div>
+                <div class="flex items-center p-3 bg-yellow-50 rounded-lg">
+                    <i class="fas fa-clock text-yellow-500 mr-3"></i>
+                    <div>
+                        <div class="font-semibold text-yellow-700">Medium Priority</div>
+                        <div class="text-sm text-yellow-600">Add Content Management - Enable tutors to create content</div>
+                    </div>
+                </div>
+                <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                    <i class="fas fa-chart-line text-blue-500 mr-3"></i>
+                    <div>
+                        <div class="font-semibold text-blue-700">Low Priority</div>
+                        <div class="text-sm text-blue-600">Enhance Analytics - Add detailed performance tracking</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle feature details
+        document.querySelectorAll('.toggle-details').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const details = e.target.closest('.mindmap-node').querySelector('.feature-details');
+                const icon = e.target.querySelector('i');
+                
+                details.classList.toggle('show');
+                if (details.classList.contains('show')) {
+                    icon.className = 'fas fa-chevron-up';
+                } else {
+                    icon.className = 'fas fa-chevron-down';
+                }
+            });
+        });
+
+        // Count features by status
+        function updateCounts() {
+            const working = document.querySelectorAll('.status-working').length;
+            const partial = document.querySelectorAll('.status-partial').length;
+            const broken = document.querySelectorAll('.status-broken').length;
+            const pending = document.querySelectorAll('.status-pending').length;
+
+            document.getElementById('workingCount').textContent = working;
+            document.getElementById('partialCount').textContent = partial;
+            document.getElementById('brokenCount').textContent = broken;
+            document.getElementById('pendingCount').textContent = pending;
+        }
+
+        // Initialize counts
+        updateCounts();
+
+        // Add click handlers for mindmap nodes
+        document.querySelectorAll('.mindmap-node').forEach(node => {
+            node.addEventListener('click', (e) => {
+                if (!e.target.closest('.toggle-details')) {
+                    const details = node.querySelector('.feature-details');
+                    const button = node.querySelector('.toggle-details i');
+                    
+                    details.classList.toggle('show');
+                    if (details.classList.contains('show')) {
+                        button.className = 'fas fa-chevron-up';
+                    } else {
+                        button.className = 'fas fa-chevron-down';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
