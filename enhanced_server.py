@@ -4,19 +4,45 @@ Enhanced SmartTest Arena Server with CAT Quiz Integration
 Deployed to Railway - Updated for production
 """
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form, status
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Float, ForeignKey, JSON
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Float, ForeignKey, JSON, Boolean
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 import json
+import os
+import bcrypt
+from jose import JWTError, jwt
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 # Create Base
 Base = declarative_base()
 
+# Security
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+# Rate Limiter
+limiter = Limiter(key_func=get_remote_address)
+
 # Database Models
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    email = Column(String(100), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
+    is_tutor = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 class Subject(Base):
     __tablename__ = "subjects"
     
@@ -51,7 +77,7 @@ class StudentProfile(Base):
     __tablename__ = "student_profiles"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False)
     performance_history = Column(JSON)
     recommendations = Column(JSON)
@@ -62,14 +88,51 @@ class Analytics(Base):
     __tablename__ = "analytics"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False)
     daily_submissions = Column(JSON)
     topic_performance = Column(JSON)
     trends = Column(JSON)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+class QuizAttempt(Base):
+    __tablename__ = "quiz_attempts"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False)
+    topic_id = Column(Integer, ForeignKey("topics.id"), nullable=False)
+    score = Column(Float, nullable=False)
+    total_questions = Column(Integer, nullable=False)
+    time_taken = Column(Integer)  # in seconds
+    answers = Column(JSON)  # store user answers
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 # Pydantic Models
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    is_tutor: bool = False
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserRead(BaseModel):
+    id: int
+    name: str
+    email: str
+    is_tutor: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
 class SubjectCreate(BaseModel):
     name: str
     description: Optional[str] = None
@@ -121,8 +184,16 @@ class QuestionRead(BaseModel):
     class Config:
         from_attributes = True
 
+class QuizSubmission(BaseModel):
+    user_id: int
+    subject_id: int
+    topic_id: int
+    score: float
+    total_questions: int
+    time_taken: Optional[int] = None
+    answers: Dict[str, Any]
+
 # Database setup
-import os
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./smarttest_arena.db")
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
@@ -151,6 +222,49 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Security
+security = HTTPBearer()
+
+# Utility functions
+def verify_password(plain_password, hashed_password):
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+def get_password_hash(password):
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: SessionLocal = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if user is None:
+        raise credentials_exception
+    return user
+
 # Basic endpoints
 @app.get("/")
 def read_root():
@@ -160,6 +274,56 @@ def read_root():
 def health_check():
     return {"status": "healthy", "message": "Enhanced server is working"}
 
+# Authentication endpoints
+@app.post("/auth/signup", response_model=Token)
+def signup(user: UserCreate, db: SessionLocal = Depends(get_db)):
+    """Register a new user"""
+    # Check if user already exists
+    existing_user = db.query(User).filter(User.email == user.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Create new user
+    hashed_password = get_password_hash(user.password)
+    db_user = User(
+        name=user.name,
+        email=user.email,
+        hashed_password=hashed_password,
+        is_tutor=user.is_tutor
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    
+    # Create access token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": str(db_user.id)}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.post("/auth/login", response_model=Token)
+def login(user_credentials: UserLogin, db: SessionLocal = Depends(get_db)):
+    """Login user"""
+    user = db.query(User).filter(User.email == user_credentials.email).first()
+    if not user or not verify_password(user_credentials.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": str(user.id)}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/auth/me", response_model=UserRead)
+def get_current_user_info(current_user: User = Depends(get_current_user)):
+    """Get current user information"""
+    return current_user
+
 # Subject Management
 @app.get("/subjects", response_model=List[SubjectRead])
 def get_subjects(db: SessionLocal = Depends(get_db)):
@@ -167,8 +331,11 @@ def get_subjects(db: SessionLocal = Depends(get_db)):
     return db.query(Subject).all()
 
 @app.post("/subjects", response_model=SubjectRead)
-def create_subject(subject: SubjectCreate, db: SessionLocal = Depends(get_db)):
-    """Create a new subject"""
+def create_subject(subject: SubjectCreate, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Create a new subject (tutors only)"""
+    if not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Only tutors can create subjects")
+    
     db_subject = Subject(**subject.dict())
     db.add(db_subject)
     db.commit()
@@ -183,6 +350,37 @@ def get_subject(subject_id: int, db: SessionLocal = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Subject not found")
     return subject
 
+@app.put("/subjects/{subject_id}", response_model=SubjectRead)
+def update_subject(subject_id: int, subject: SubjectCreate, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Update a subject (tutors only)"""
+    if not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Only tutors can update subjects")
+    
+    db_subject = db.query(Subject).filter(Subject.id == subject_id).first()
+    if not db_subject:
+        raise HTTPException(status_code=404, detail="Subject not found")
+    
+    for key, value in subject.dict().items():
+        setattr(db_subject, key, value)
+    
+    db.commit()
+    db.refresh(db_subject)
+    return db_subject
+
+@app.delete("/subjects/{subject_id}")
+def delete_subject(subject_id: int, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Delete a subject (tutors only)"""
+    if not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Only tutors can delete subjects")
+    
+    db_subject = db.query(Subject).filter(Subject.id == subject_id).first()
+    if not db_subject:
+        raise HTTPException(status_code=404, detail="Subject not found")
+    
+    db.delete(db_subject)
+    db.commit()
+    return {"message": "Subject deleted successfully"}
+
 # Topic Management
 @app.get("/topics", response_model=List[TopicRead])
 def get_topics(db: SessionLocal = Depends(get_db)):
@@ -190,8 +388,16 @@ def get_topics(db: SessionLocal = Depends(get_db)):
     return db.query(Topic).all()
 
 @app.post("/topics", response_model=TopicRead)
-def create_topic(topic: TopicCreate, subject_id: int, db: SessionLocal = Depends(get_db)):
-    """Create a new topic"""
+def create_topic(topic: TopicCreate, subject_id: int, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Create a new topic (tutors only)"""
+    if not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Only tutors can create topics")
+    
+    # Verify subject exists
+    subject = db.query(Subject).filter(Subject.id == subject_id).first()
+    if not subject:
+        raise HTTPException(status_code=404, detail="Subject not found")
+    
     db_topic = Topic(**topic.dict(), subject_id=subject_id)
     db.add(db_topic)
     db.commit()
@@ -204,6 +410,37 @@ def get_subject_topics(subject_id: int, db: SessionLocal = Depends(get_db)):
     topics = db.query(Topic).filter(Topic.subject_id == subject_id).all()
     return topics
 
+@app.put("/topics/{topic_id}", response_model=TopicRead)
+def update_topic(topic_id: int, topic: TopicCreate, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Update a topic (tutors only)"""
+    if not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Only tutors can update topics")
+    
+    db_topic = db.query(Topic).filter(Topic.id == topic_id).first()
+    if not db_topic:
+        raise HTTPException(status_code=404, detail="Topic not found")
+    
+    for key, value in topic.dict().items():
+        setattr(db_topic, key, value)
+    
+    db.commit()
+    db.refresh(db_topic)
+    return db_topic
+
+@app.delete("/topics/{topic_id}")
+def delete_topic(topic_id: int, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Delete a topic (tutors only)"""
+    if not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Only tutors can delete topics")
+    
+    db_topic = db.query(Topic).filter(Topic.id == topic_id).first()
+    if not db_topic:
+        raise HTTPException(status_code=404, detail="Topic not found")
+    
+    db.delete(db_topic)
+    db.commit()
+    return {"message": "Topic deleted successfully"}
+
 # Question Management
 @app.get("/questions", response_model=List[QuestionRead])
 def get_questions(db: SessionLocal = Depends(get_db)):
@@ -211,8 +448,16 @@ def get_questions(db: SessionLocal = Depends(get_db)):
     return db.query(Question).all()
 
 @app.post("/questions", response_model=QuestionRead)
-def create_question(question: QuestionCreate, topic_id: int, db: SessionLocal = Depends(get_db)):
-    """Create a new question"""
+def create_question(question: QuestionCreate, topic_id: int, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Create a new question (tutors only)"""
+    if not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Only tutors can create questions")
+    
+    # Verify topic exists
+    topic = db.query(Topic).filter(Topic.id == topic_id).first()
+    if not topic:
+        raise HTTPException(status_code=404, detail="Topic not found")
+    
     db_question = Question(**question.dict(), topic_id=topic_id)
     db.add(db_question)
     db.commit()
@@ -225,11 +470,121 @@ def get_topic_questions(topic_id: int, db: SessionLocal = Depends(get_db)):
     questions = db.query(Question).filter(Question.topic_id == topic_id).all()
     return questions
 
+@app.put("/questions/{question_id}", response_model=QuestionRead)
+def update_question(question_id: int, question: QuestionCreate, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Update a question (tutors only)"""
+    if not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Only tutors can update questions")
+    
+    db_question = db.query(Question).filter(Question.id == question_id).first()
+    if not db_question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    for key, value in question.dict().items():
+        setattr(db_question, key, value)
+    
+    db.commit()
+    db.refresh(db_question)
+    return db_question
+
+@app.delete("/questions/{question_id}")
+def delete_question(question_id: int, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Delete a question (tutors only)"""
+    if not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Only tutors can delete questions")
+    
+    db_question = db.query(Question).filter(Question.id == question_id).first()
+    if not db_question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    db.delete(db_question)
+    db.commit()
+    return {"message": "Question deleted successfully"}
+
+# Quiz Attempts
+@app.post("/quiz/attempts", response_model=Dict[str, Any])
+def create_quiz_attempt(attempt: QuizSubmission, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Submit a quiz attempt"""
+    # Verify subject and topic exist
+    subject = db.query(Subject).filter(Subject.id == attempt.subject_id).first()
+    if not subject:
+        raise HTTPException(status_code=404, detail="Subject not found")
+    
+    topic = db.query(Topic).filter(Topic.id == attempt.topic_id).first()
+    if not topic:
+        raise HTTPException(status_code=404, detail="Topic not found")
+    
+    # Create quiz attempt
+    db_attempt = QuizAttempt(
+        user_id=current_user.id,
+        subject_id=attempt.subject_id,
+        topic_id=attempt.topic_id,
+        score=attempt.score,
+        total_questions=attempt.total_questions,
+        time_taken=attempt.time_taken,
+        answers=attempt.answers
+    )
+    db.add(db_attempt)
+    db.commit()
+    db.refresh(db_attempt)
+    
+    # Update analytics
+    update_analytics(current_user.id, attempt.subject_id, {
+        "daily_submissions": {datetime.now().strftime("%Y-%m-%d"): 1},
+        "topic_performance": {topic.name: attempt.score},
+        "trends": {"recent_scores": [attempt.score]}
+    }, db)
+    
+    # Update student profile
+    update_student_profile(current_user.id, attempt.subject_id, {
+        "performance_history": [{
+            "date": datetime.now().isoformat(),
+            "score": attempt.score,
+            "topic": topic.name,
+            "total_questions": attempt.total_questions
+        }],
+        "recommendations": generate_recommendations(attempt.score, attempt.total_questions)
+    }, db)
+    
+    return {
+        "message": "Quiz submitted successfully",
+        "attempt_id": db_attempt.id,
+        "score": attempt.score,
+        "percentage": (attempt.score / attempt.total_questions) * 100
+    }
+
+@app.get("/quiz/attempts/user/{user_id}")
+def get_user_attempts(user_id: int, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Get all quiz attempts for a user"""
+    if current_user.id != user_id and not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Can only view your own attempts")
+    
+    attempts = db.query(QuizAttempt).filter(QuizAttempt.user_id == user_id).all()
+    return attempts
+
+def generate_recommendations(score: float, total_questions: int) -> List[str]:
+    """Generate personalized recommendations based on performance"""
+    percentage = (score / total_questions) * 100
+    
+    if percentage >= 90:
+        return ["Excellent work! Keep up the great performance.", "Consider helping other students."]
+    elif percentage >= 80:
+        return ["Good job! Focus on the areas where you made mistakes.", "Practice more to reach excellence."]
+    elif percentage >= 70:
+        return ["You're doing well. Review the concepts you struggled with.", "More practice will improve your score."]
+    elif percentage >= 60:
+        return ["You need more practice. Focus on fundamental concepts.", "Consider seeking help from a tutor."]
+    else:
+        return ["You need significant improvement. Review the basics thoroughly.", "Consider taking remedial lessons."]
+
 # Analytics
 @app.get("/analytics/user/{user_id}")
-def get_user_analytics(user_id: int, db: SessionLocal = Depends(get_db)):
+def get_user_analytics(user_id: int, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get analytics for a specific user"""
-    analytics = db.query(Analytics).filter(Analytics.user_id == user_id).first()
+    if current_user.id != user_id and not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Can only view your own analytics")
+    
+    analytics = db.query(Analytics).filter(Analytics.user_id == user_id).all()
     if not analytics:
         return {"message": "No analytics found for user"}
     return analytics
@@ -261,8 +616,11 @@ def update_analytics(user_id: int, subject_id: int, data: Dict[str, Any], db: Se
 
 # Student Profiles
 @app.get("/student-profiles/user/{user_id}")
-def get_student_profiles(user_id: int, db: SessionLocal = Depends(get_db)):
+def get_student_profiles(user_id: int, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get all student profiles for a user"""
+    if current_user.id != user_id and not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Can only view your own profiles")
+    
     profiles = db.query(StudentProfile).filter(StudentProfile.user_id == user_id).all()
     return profiles
 
@@ -290,10 +648,58 @@ def update_student_profile(user_id: int, subject_id: int, performance_data: Dict
     db.commit()
     return {"message": "Student profile updated successfully"}
 
-# Quiz Submission
+# File Upload
+@app.post("/upload/exam")
+async def upload_exam_file(
+    file: UploadFile = File(...),
+    subject_id: int = Form(...),
+    topic_id: int = Form(...),
+    db: SessionLocal = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Upload an exam file (tutors only)"""
+    if not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Only tutors can upload files")
+    
+    # Validate file type
+    allowed_types = [".pdf", ".docx", ".txt", ".html"]
+    file_extension = os.path.splitext(file.filename)[1].lower()
+    if file_extension not in allowed_types:
+        raise HTTPException(status_code=400, detail="File type not allowed")
+    
+    # Validate file size (5MB limit)
+    if file.size > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large (max 5MB)")
+    
+    # Save file
+    upload_dir = "uploads"
+    os.makedirs(upload_dir, exist_ok=True)
+    
+    file_path = os.path.join(upload_dir, f"{current_user.id}_{file.filename}")
+    with open(file_path, "wb") as buffer:
+        content = await file.read()
+        buffer.write(content)
+    
+    return {
+        "message": "File uploaded successfully",
+        "filename": file.filename,
+        "file_path": file_path,
+        "subject_id": subject_id,
+        "topic_id": topic_id
+    }
+
+# Leaderboard
+@app.get("/leaderboard")
+def get_leaderboard(db: SessionLocal = Depends(get_db), limit: int = 10):
+    """Get leaderboard of top performers"""
+    # Simplified leaderboard - return empty for now
+    # TODO: Implement proper leaderboard with SQL aggregation
+    return []
+
+# Quiz Submission (Legacy endpoint for compatibility)
 @app.post("/quiz/submit")
 def submit_quiz(submission_data: Dict[str, Any], db: SessionLocal = Depends(get_db)):
-    """Submit quiz results and update analytics"""
+    """Submit quiz results and update analytics (legacy endpoint)"""
     user_id = submission_data.get("user_id")
     subject_id = submission_data.get("subject_id")
     score = submission_data.get("score", 0)
@@ -313,11 +719,7 @@ def submit_quiz(submission_data: Dict[str, Any], db: SessionLocal = Depends(get_
             "score": score,
             "topic": topic
         }],
-        "recommendations": [
-            "Focus on improving weak areas",
-            "Practice more questions",
-            "Review fundamental concepts"
-        ]
+        "recommendations": generate_recommendations(score, 10)  # Assume 10 questions
     }
     
     # Update both analytics and profile
