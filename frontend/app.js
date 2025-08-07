@@ -1,7 +1,8 @@
 // SmartTest Arena Frontend Application
 class SmartTestArena {
     constructor() {
-        this.apiBaseUrl = 'http://localhost:8001';
+        // Use the current domain for API calls
+        this.apiBaseUrl = window.location.origin;
         this.currentUser = null;
         this.authToken = localStorage.getItem('authToken');
         this.init();
