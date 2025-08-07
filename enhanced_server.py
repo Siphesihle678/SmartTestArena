@@ -273,15 +273,35 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
 # Basic endpoints
 @app.get("/")
 def read_root():
-    return FileResponse("frontend/index.html")
+    try:
+        return FileResponse("frontend/index.html")
+    except:
+        return {"message": "SmartTest Arena Enhanced Server is running!", "status": "healthy"}
 
 @app.get("/app")
 def serve_app():
-    return FileResponse("frontend/index.html")
+    try:
+        return FileResponse("frontend/index.html")
+    except:
+        return {"message": "SmartTest Arena Enhanced Server is running!", "status": "healthy"}
 
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "message": "Enhanced server is working"}
+
+@app.get("/frontend")
+def serve_frontend():
+    try:
+        return FileResponse("frontend/index.html")
+    except:
+        return {"error": "Frontend not found"}
+
+@app.get("/static/{path:path}")
+def serve_static(path: str):
+    try:
+        return FileResponse(f"frontend/{path}")
+    except:
+        return {"error": f"File {path} not found"}
 
 # Authentication endpoints
 @app.post("/auth/signup", response_model=Token)
