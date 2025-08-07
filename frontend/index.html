@@ -194,6 +194,154 @@
             </div>
         </section>
 
+        <!-- Subject Management Modals -->
+        <!-- Add Subject Modal -->
+        <div id="addSubjectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Add New Subject</h3>
+                        <button id="closeAddSubjectModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="addSubjectForm" class="px-6 py-4">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="subjectName" class="block text-sm font-medium text-gray-700">Subject Name *</label>
+                                <input type="text" id="subjectName" name="name" required
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="subjectDescription" class="block text-sm font-medium text-gray-700">Description</label>
+                                <textarea id="subjectDescription" name="description" rows="3"
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                            <div>
+                                <label for="subjectGradeLevel" class="block text-sm font-medium text-gray-700">Grade Level</label>
+                                <select id="subjectGradeLevel" name="grade_level"
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Select Grade Level</option>
+                                    <option value="Elementary">Elementary (K-5)</option>
+                                    <option value="Middle School">Middle School (6-8)</option>
+                                    <option value="High School">High School (9-12)</option>
+                                    <option value="College">College/University</option>
+                                    <option value="Adult Education">Adult Education</option>
+                                    <option value="All Levels">All Levels</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="subjectCurriculum" class="block text-sm font-medium text-gray-700">Curriculum</label>
+                                <select id="subjectCurriculum" name="curriculum"
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Select Curriculum</option>
+                                    <option value="Common Core">Common Core</option>
+                                    <option value="IB">International Baccalaureate (IB)</option>
+                                    <option value="Cambridge">Cambridge International</option>
+                                    <option value="South African CAPS">South African CAPS</option>
+                                    <option value="UK National">UK National Curriculum</option>
+                                    <option value="Australian">Australian Curriculum</option>
+                                    <option value="Custom">Custom Curriculum</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button type="button" id="cancelAddSubject" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">
+                                Add Subject
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Subject Modal -->
+        <div id="editSubjectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Edit Subject</h3>
+                        <button id="closeEditSubjectModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="editSubjectForm" class="px-6 py-4">
+                        <input type="hidden" id="editSubjectId" name="id">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="editSubjectName" class="block text-sm font-medium text-gray-700">Subject Name *</label>
+                                <input type="text" id="editSubjectName" name="name" required
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="editSubjectDescription" class="block text-sm font-medium text-gray-700">Description</label>
+                                <textarea id="editSubjectDescription" name="description" rows="3"
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                            <div>
+                                <label for="editSubjectGradeLevel" class="block text-sm font-medium text-gray-700">Grade Level</label>
+                                <select id="editSubjectGradeLevel" name="grade_level"
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Select Grade Level</option>
+                                    <option value="Elementary">Elementary (K-5)</option>
+                                    <option value="Middle School">Middle School (6-8)</option>
+                                    <option value="High School">High School (9-12)</option>
+                                    <option value="College">College/University</option>
+                                    <option value="Adult Education">Adult Education</option>
+                                    <option value="All Levels">All Levels</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="editSubjectCurriculum" class="block text-sm font-medium text-gray-700">Curriculum</label>
+                                <select id="editSubjectCurriculum" name="curriculum"
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Select Curriculum</option>
+                                    <option value="Common Core">Common Core</option>
+                                    <option value="IB">International Baccalaureate (IB)</option>
+                                    <option value="Cambridge">Cambridge International</option>
+                                    <option value="South African CAPS">South African CAPS</option>
+                                    <option value="UK National">UK National Curriculum</option>
+                                    <option value="Australian">Australian Curriculum</option>
+                                    <option value="Custom">Custom Curriculum</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button type="button" id="cancelEditSubject" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">
+                                Update Subject
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteSubjectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                    <div class="px-6 py-4">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Delete Subject</h3>
+                        <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete this subject? This action cannot be undone and will also delete all associated topics and questions.</p>
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" id="cancelDeleteSubject" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button type="button" id="confirmDeleteSubject" class="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700">
+                                Delete Subject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Quiz Section -->
         <section id="quiz" class="hidden">
             <div class="bg-white p-6 rounded-lg shadow-md">

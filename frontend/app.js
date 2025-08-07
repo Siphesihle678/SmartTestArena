@@ -8,6 +8,7 @@ class SmartTestArena {
         this.dashboardRefreshInterval = null;
         this.performanceChart = null;
         this.analyticsChart = null;
+        this.subjectToDelete = null;
         this.init();
     }
 
@@ -183,6 +184,19 @@ class SmartTestArena {
         document.getElementById('startQuizBtn').addEventListener('click', () => this.showQuizSection());
         document.getElementById('viewAnalyticsBtn').addEventListener('click', () => this.showAnalyticsSection());
         document.getElementById('manageContentBtn').addEventListener('click', () => this.showSubjectsSection());
+        
+        // Subject management
+        document.getElementById('addSubjectBtn').addEventListener('click', () => this.showAddSubjectModal());
+        document.getElementById('addSubjectForm').addEventListener('submit', (e) => this.handleAddSubject(e));
+        document.getElementById('editSubjectForm').addEventListener('submit', (e) => this.handleEditSubject(e));
+        
+        // Modal controls
+        document.getElementById('closeAddSubjectModal').addEventListener('click', () => this.hideAddSubjectModal());
+        document.getElementById('cancelAddSubject').addEventListener('click', () => this.hideAddSubjectModal());
+        document.getElementById('closeEditSubjectModal').addEventListener('click', () => this.hideEditSubjectModal());
+        document.getElementById('cancelEditSubject').addEventListener('click', () => this.hideEditSubjectModal());
+        document.getElementById('cancelDeleteSubject').addEventListener('click', () => this.hideDeleteSubjectModal());
+        document.getElementById('confirmDeleteSubject').addEventListener('click', () => this.handleDeleteSubject());
     }
 
     updateAuthUI() {
@@ -618,20 +632,36 @@ class SmartTestArena {
         
         subjects.forEach(subject => {
             const card = document.createElement('div');
-            card.className = 'bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition cursor-pointer';
+            card.className = 'bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition';
             card.innerHTML = `
                 <div class="flex items-center justify-between mb-4">
                     <h4 class="text-xl font-semibold text-gray-800">${subject.name}</h4>
-                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">${subject.grade_level || 'All Grades'}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">${subject.grade_level || 'All Grades'}</span>
+                        ${this.currentUser && this.currentUser.is_tutor ? `
+                            <div class="flex space-x-1">
+                                <button onclick="smartTestArena.editSubject(${subject.id})" class="text-gray-400 hover:text-blue-600 transition" title="Edit Subject">
+                                    <i class="fas fa-edit text-sm"></i>
+                                </button>
+                                <button onclick="smartTestArena.deleteSubject(${subject.id})" class="text-gray-400 hover:text-red-600 transition" title="Delete Subject">
+                                    <i class="fas fa-trash text-sm"></i>
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
                 </div>
                 <p class="text-gray-600 mb-4">${subject.description || 'No description available'}</p>
-                <div class="flex justify-between text-sm text-gray-500">
+                <div class="flex justify-between text-sm text-gray-500 mb-4">
                     <span>Curriculum: ${subject.curriculum || 'N/A'}</span>
                     <span>Created: ${new Date(subject.created_at).toLocaleDateString()}</span>
                 </div>
-                <div class="mt-4 flex space-x-2">
-                    <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition">View Topics</button>
-                    <button class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition">Start Quiz</button>
+                <div class="flex space-x-2">
+                    <button onclick="smartTestArena.viewTopics(${subject.id})" class="flex-1 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition">
+                        <i class="fas fa-list mr-1"></i> Topics
+                    </button>
+                    <button onclick="smartTestArena.startQuizForSubject(${subject.id})" class="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition">
+                        <i class="fas fa-play mr-1"></i> Quiz
+                    </button>
                 </div>
             `;
             container.appendChild(card);
@@ -741,6 +771,175 @@ class SmartTestArena {
             toast.classList.remove('show');
             setTimeout(() => container.removeChild(toast), 300);
         }, 3000);
+    }
+
+    // Subject Management Methods
+    showAddSubjectModal() {
+        if (!this.currentUser || !this.currentUser.is_tutor) {
+            this.showToast('Only tutors can add subjects', 'error');
+            return;
+        }
+        document.getElementById('addSubjectModal').classList.remove('hidden');
+        document.getElementById('subjectName').focus();
+    }
+
+    hideAddSubjectModal() {
+        document.getElementById('addSubjectModal').classList.add('hidden');
+        document.getElementById('addSubjectForm').reset();
+    }
+
+    showEditSubjectModal() {
+        document.getElementById('editSubjectModal').classList.remove('hidden');
+        document.getElementById('editSubjectName').focus();
+    }
+
+    hideEditSubjectModal() {
+        document.getElementById('editSubjectModal').classList.add('hidden');
+        document.getElementById('editSubjectForm').reset();
+    }
+
+    showDeleteSubjectModal() {
+        document.getElementById('deleteSubjectModal').classList.remove('hidden');
+    }
+
+    hideDeleteSubjectModal() {
+        document.getElementById('deleteSubjectModal').classList.add('hidden');
+        this.subjectToDelete = null;
+    }
+
+    async handleAddSubject(e) {
+        e.preventDefault();
+        
+        if (!this.currentUser || !this.currentUser.is_tutor) {
+            this.showToast('Only tutors can add subjects', 'error');
+            return;
+        }
+
+        const formData = new FormData(e.target);
+        const subjectData = {
+            name: formData.get('name'),
+            description: formData.get('description') || null,
+            grade_level: formData.get('grade_level') || null,
+            curriculum: formData.get('curriculum') || null
+        };
+
+        try {
+            await this.apiRequest('/subjects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(subjectData)
+            });
+            
+            this.showToast('Subject added successfully!', 'success');
+            this.hideAddSubjectModal();
+            await this.getSubjects(); // Refresh the subjects list
+        } catch (error) {
+            console.error('Failed to add subject:', error);
+            this.showToast('Failed to add subject. Please try again.', 'error');
+        }
+    }
+
+    async editSubject(subjectId) {
+        if (!this.currentUser || !this.currentUser.is_tutor) {
+            this.showToast('Only tutors can edit subjects', 'error');
+            return;
+        }
+
+        try {
+            const subject = await this.apiRequest(`/subjects/${subjectId}`);
+            
+            // Populate the edit form
+            document.getElementById('editSubjectId').value = subject.id;
+            document.getElementById('editSubjectName').value = subject.name;
+            document.getElementById('editSubjectDescription').value = subject.description || '';
+            document.getElementById('editSubjectGradeLevel').value = subject.grade_level || '';
+            document.getElementById('editSubjectCurriculum').value = subject.curriculum || '';
+            
+            this.showEditSubjectModal();
+        } catch (error) {
+            console.error('Failed to load subject for editing:', error);
+            this.showToast('Failed to load subject details', 'error');
+        }
+    }
+
+    async handleEditSubject(e) {
+        e.preventDefault();
+        
+        if (!this.currentUser || !this.currentUser.is_tutor) {
+            this.showToast('Only tutors can edit subjects', 'error');
+            return;
+        }
+
+        const formData = new FormData(e.target);
+        const subjectId = formData.get('id');
+        const subjectData = {
+            name: formData.get('name'),
+            description: formData.get('description') || null,
+            grade_level: formData.get('grade_level') || null,
+            curriculum: formData.get('curriculum') || null
+        };
+
+        try {
+            await this.apiRequest(`/subjects/${subjectId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(subjectData)
+            });
+            
+            this.showToast('Subject updated successfully!', 'success');
+            this.hideEditSubjectModal();
+            await this.getSubjects(); // Refresh the subjects list
+        } catch (error) {
+            console.error('Failed to update subject:', error);
+            this.showToast('Failed to update subject. Please try again.', 'error');
+        }
+    }
+
+    deleteSubject(subjectId) {
+        if (!this.currentUser || !this.currentUser.is_tutor) {
+            this.showToast('Only tutors can delete subjects', 'error');
+            return;
+        }
+
+        this.subjectToDelete = subjectId;
+        this.showDeleteSubjectModal();
+    }
+
+    async handleDeleteSubject() {
+        if (!this.subjectToDelete || !this.currentUser || !this.currentUser.is_tutor) {
+            return;
+        }
+
+        try {
+            await this.apiRequest(`/subjects/${this.subjectToDelete}`, {
+                method: 'DELETE'
+            });
+            
+            this.showToast('Subject deleted successfully!', 'success');
+            this.hideDeleteSubjectModal();
+            await this.getSubjects(); // Refresh the subjects list
+        } catch (error) {
+            console.error('Failed to delete subject:', error);
+            this.showToast('Failed to delete subject. Please try again.', 'error');
+        }
+    }
+
+    // Subject action methods
+    async viewTopics(subjectId) {
+        try {
+            const topics = await this.apiRequest(`/subjects/${subjectId}/topics`);
+            this.showToast(`Found ${topics.length} topics for this subject`, 'info');
+            // TODO: Implement topic viewing UI
+        } catch (error) {
+            console.error('Failed to load topics:', error);
+            this.showToast('Failed to load topics', 'error');
+        }
+    }
+
+    startQuizForSubject(subjectId) {
+        this.showQuizSection();
+        // TODO: Pre-select the subject in quiz setup
+        this.showToast('Quiz section opened', 'info');
     }
 }
 
