@@ -5,6 +5,7 @@ class SmartTestArena {
         this.apiBaseUrl = window.location.origin;
         this.currentUser = null;
         this.authToken = localStorage.getItem('authToken');
+        this.dashboardRefreshInterval = null;
         this.init();
     }
 
@@ -102,6 +103,7 @@ class SmartTestArena {
         this.authToken = null;
         this.currentUser = null;
         localStorage.removeItem('authToken');
+        this.stopDashboardRefresh();
         this.updateAuthUI();
         this.showWelcome();
         this.showToast('Logged out successfully', 'info');
@@ -251,6 +253,9 @@ class SmartTestArena {
     showDashboard() {
         this.showSection('dashboard');
         this.loadDashboardData();
+        
+        // Start real-time refresh every 30 seconds
+        this.startDashboardRefresh();
     }
 
     showSubjectsSection() {
@@ -304,11 +309,91 @@ class SmartTestArena {
         if (!this.currentUser) return;
         
         try {
+            // Load real-time analytics
+            const analytics = await this.apiRequest(`/analytics/dashboard/${this.currentUser.id}`);
+            this.displayDashboardAnalytics(analytics);
+            
+            // Load subjects count
             const subjects = await this.apiRequest('/subjects');
             document.getElementById('totalSubjects').textContent = subjects.length;
+            
             this.showToast('Dashboard loaded successfully', 'success');
         } catch (error) {
             console.error('Failed to load dashboard data:', error);
+            // Fallback to basic data
+            try {
+                const subjects = await this.apiRequest('/subjects');
+                document.getElementById('totalSubjects').textContent = subjects.length;
+            } catch (fallbackError) {
+                console.error('Fallback also failed:', fallbackError);
+            }
+        }
+    }
+
+    displayDashboardAnalytics(analytics) {
+        // Update real-time stats
+        const stats = analytics.real_time_stats;
+        document.getElementById('totalAttempts').textContent = stats.total_attempts;
+        document.getElementById('avgScore').textContent = `${stats.average_score}%`;
+        document.getElementById('todayActivity').textContent = stats.today_attempts;
+        
+        // Update recent activity
+        const activityContainer = document.getElementById('recentActivity');
+        if (analytics.recent_activity.length > 0) {
+            activityContainer.innerHTML = analytics.recent_activity.map(activity => `
+                <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center">
+                        <i class="fas fa-question-circle text-blue-500 mr-2"></i>
+                        <span>${activity.subject} - ${activity.score}</span>
+                    </div>
+                    <span class="text-gray-500">${activity.time}</span>
+                </div>
+            `).join('');
+        } else {
+            activityContainer.innerHTML = '<p class="text-gray-500 text-sm">No recent activity</p>';
+        }
+        
+        // Add weekly progress indicator
+        const weeklyProgress = analytics.weekly_progress;
+        if (weeklyProgress.attempts_count > 0) {
+            const progressIndicator = document.createElement('div');
+            progressIndicator.className = 'mt-4 p-3 bg-blue-50 rounded-lg';
+            progressIndicator.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-blue-700">Weekly Progress</span>
+                    <span class="text-sm text-blue-600">${weeklyProgress.attempts_count} attempts</span>
+                </div>
+                <div class="mt-2">
+                    <div class="flex justify-between text-xs text-blue-600">
+                        <span>Weekly Average: ${weeklyProgress.average_score}%</span>
+                        <span class="${weeklyProgress.improvement === 'positive' ? 'text-green-600' : 'text-gray-600'}">
+                            ${weeklyProgress.improvement === 'positive' ? '↗ Improving' : '→ Stable'}
+                        </span>
+                    </div>
+                </div>
+            `;
+            activityContainer.appendChild(progressIndicator);
+        }
+    }
+
+    startDashboardRefresh() {
+        // Clear any existing interval
+        if (this.dashboardRefreshInterval) {
+            clearInterval(this.dashboardRefreshInterval);
+        }
+        
+        // Start new refresh interval (30 seconds)
+        this.dashboardRefreshInterval = setInterval(() => {
+            if (this.currentUser && document.getElementById('dashboard').classList.contains('hidden') === false) {
+                this.loadDashboardData();
+            }
+        }, 30000); // 30 seconds
+    }
+
+    stopDashboardRefresh() {
+        if (this.dashboardRefreshInterval) {
+            clearInterval(this.dashboardRefreshInterval);
+            this.dashboardRefreshInterval = null;
         }
     }
 

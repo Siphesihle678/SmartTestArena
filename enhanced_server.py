@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Float, ForeignKey, JSON, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Float, ForeignKey, JSON, Boolean, func
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
@@ -617,6 +617,91 @@ def get_user_analytics(user_id: int, db: SessionLocal = Depends(get_db), current
     if not analytics:
         return {"message": "No analytics found for user"}
     return analytics
+
+@app.get("/analytics/dashboard/{user_id}")
+def get_dashboard_analytics(user_id: int, db: SessionLocal = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Get real-time dashboard analytics for a user"""
+    if current_user.id != user_id and not current_user.is_tutor:
+        raise HTTPException(status_code=403, detail="Can only view your own analytics")
+    
+    # Get recent quiz attempts
+    recent_attempts = db.query(QuizAttempt).filter(
+        QuizAttempt.user_id == user_id
+    ).order_by(QuizAttempt.created_at.desc()).limit(10).all()
+    
+    # Calculate real-time stats
+    total_attempts = db.query(QuizAttempt).filter(QuizAttempt.user_id == user_id).count()
+    total_subjects = db.query(Subject).count()
+    
+    # Calculate average score
+    avg_score = 0
+    if total_attempts > 0:
+        total_score = db.query(func.sum(QuizAttempt.score)).filter(QuizAttempt.user_id == user_id).scalar() or 0
+        avg_score = (total_score / total_attempts) * 100
+    
+    # Get today's activity
+    today = datetime.utcnow().date()
+    today_attempts = db.query(QuizAttempt).filter(
+        QuizAttempt.user_id == user_id,
+        func.date(QuizAttempt.created_at) == today
+    ).count()
+    
+    # Get weekly progress
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    weekly_attempts = db.query(QuizAttempt).filter(
+        QuizAttempt.user_id == user_id,
+        QuizAttempt.created_at >= week_ago
+    ).all()
+    
+    weekly_scores = [attempt.score for attempt in weekly_attempts]
+    weekly_avg = sum(weekly_scores) / len(weekly_scores) * 100 if weekly_scores else 0
+    
+    # Get subject performance
+    subject_performance = db.query(
+        Subject.name,
+        func.avg(QuizAttempt.score).label('avg_score'),
+        func.count(QuizAttempt.id).label('attempts')
+    ).join(QuizAttempt, Subject.id == QuizAttempt.subject_id).filter(
+        QuizAttempt.user_id == user_id
+    ).group_by(Subject.id, Subject.name).all()
+    
+    # Format subject performance
+    subjects_data = []
+    for subject in subject_performance:
+        subjects_data.append({
+            "subject": subject.name,
+            "average_score": round(subject.avg_score * 100, 1),
+            "attempts": subject.attempts
+        })
+    
+    # Get recent activity timeline
+    recent_activity = []
+    for attempt in recent_attempts[:5]:
+        subject = db.query(Subject).filter(Subject.id == attempt.subject_id).first()
+        recent_activity.append({
+            "type": "quiz_attempt",
+            "subject": subject.name if subject else "Unknown",
+            "score": f"{attempt.score * 100:.1f}%",
+            "time": attempt.created_at.strftime("%H:%M"),
+            "date": attempt.created_at.strftime("%b %d")
+        })
+    
+    return {
+        "real_time_stats": {
+            "total_attempts": total_attempts,
+            "total_subjects": total_subjects,
+            "average_score": round(avg_score, 1),
+            "today_attempts": today_attempts,
+            "weekly_average": round(weekly_avg, 1)
+        },
+        "subject_performance": subjects_data,
+        "recent_activity": recent_activity,
+        "weekly_progress": {
+            "attempts_count": len(weekly_attempts),
+            "average_score": round(weekly_avg, 1),
+            "improvement": "positive" if weekly_avg > avg_score else "neutral"
+        }
+    }
 
 @app.post("/analytics/update")
 def update_analytics(user_id: int, subject_id: int, data: Dict[str, Any], db: SessionLocal = Depends(get_db)):
