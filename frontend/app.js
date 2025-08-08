@@ -172,51 +172,158 @@ class SmartTestArena {
 
     // UI Methods
     setupEventListeners() {
+        console.log('Setting up event listeners...');
+        
         // Authentication
-        document.getElementById('loginBtn').addEventListener('click', () => this.showLoginForm());
-        document.getElementById('signupBtn').addEventListener('click', () => this.showSignupForm());
-        document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        if (loginBtn) {
+            loginBtn.addEventListener('click', () => this.showLoginForm());
+            console.log('Login button listener added');
+        } else {
+            console.error('Login button not found');
+        }
+        
+        if (signupBtn) {
+            signupBtn.addEventListener('click', () => this.showSignupForm());
+            console.log('Signup button listener added');
+        } else {
+            console.error('Signup button not found');
+        }
+        
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => this.logout());
+            console.log('Logout button listener added');
+        } else {
+            console.error('Logout button not found');
+        }
         
         // Form submissions
-        document.getElementById('loginFormElement').addEventListener('submit', (e) => this.handleLogin(e));
-        document.getElementById('signupFormElement').addEventListener('submit', (e) => this.handleSignup(e));
+        const loginForm = document.getElementById('loginFormElement');
+        const signupForm = document.getElementById('signupFormElement');
+        
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+            console.log('Login form listener added');
+        } else {
+            console.error('Login form not found');
+        }
+        
+        if (signupForm) {
+            signupForm.addEventListener('submit', (e) => this.handleSignup(e));
+            console.log('Signup form listener added');
+        } else {
+            console.error('Signup form not found');
+        }
         
         // Navigation
-        document.getElementById('showSignup').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showSignupForm();
-        });
-        document.getElementById('showLogin').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showLoginForm();
-        });
+        const showSignupLink = document.getElementById('showSignup');
+        const showLoginLink = document.getElementById('showLogin');
+        
+        if (showSignupLink) {
+            showSignupLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showSignupForm();
+            });
+            console.log('Show signup link listener added');
+        } else {
+            console.error('Show signup link not found');
+        }
+        
+        if (showLoginLink) {
+            showLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showLoginForm();
+            });
+            console.log('Show login link listener added');
+        } else {
+            console.error('Show login link not found');
+        }
         
         // Navigation links
-        document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+        const navLinks = document.querySelectorAll('nav a[href^="#"]');
+        navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const section = e.target.getAttribute('href').substring(1);
                 this.showSection(section);
             });
         });
+        console.log(`Navigation links listeners added: ${navLinks.length} links`);
         
         // Dashboard actions
-        document.getElementById('startQuizBtn').addEventListener('click', () => this.showQuizSection());
-        document.getElementById('viewAnalyticsBtn').addEventListener('click', () => this.showAnalyticsSection());
-        document.getElementById('manageContentBtn').addEventListener('click', () => this.showSubjectsSection());
+        const startQuizBtn = document.getElementById('startQuizBtn');
+        const viewAnalyticsBtn = document.getElementById('viewAnalyticsBtn');
+        const manageContentBtn = document.getElementById('manageContentBtn');
+        
+        if (startQuizBtn) {
+            startQuizBtn.addEventListener('click', () => this.showQuizSection());
+            console.log('Start quiz button listener added');
+        }
+        
+        if (viewAnalyticsBtn) {
+            viewAnalyticsBtn.addEventListener('click', () => this.showAnalyticsSection());
+            console.log('View analytics button listener added');
+        }
+        
+        if (manageContentBtn) {
+            manageContentBtn.addEventListener('click', () => this.showSubjectsSection());
+            console.log('Manage content button listener added');
+        }
         
         // Subject management
-        document.getElementById('addSubjectBtn').addEventListener('click', () => this.showAddSubjectModal());
-        document.getElementById('addSubjectForm').addEventListener('submit', (e) => this.handleAddSubject(e));
-        document.getElementById('editSubjectForm').addEventListener('submit', (e) => this.handleEditSubject(e));
+        const addSubjectBtn = document.getElementById('addSubjectBtn');
+        const addSubjectForm = document.getElementById('addSubjectForm');
+        const editSubjectForm = document.getElementById('editSubjectForm');
+        
+        if (addSubjectBtn) {
+            addSubjectBtn.addEventListener('click', () => this.showAddSubjectModal());
+            console.log('Add subject button listener added');
+        }
+        
+        if (addSubjectForm) {
+            addSubjectForm.addEventListener('submit', (e) => this.handleAddSubject(e));
+            console.log('Add subject form listener added');
+        }
+        
+        if (editSubjectForm) {
+            editSubjectForm.addEventListener('submit', (e) => this.handleEditSubject(e));
+            console.log('Edit subject form listener added');
+        }
         
         // Modal controls
-        document.getElementById('closeAddSubjectModal').addEventListener('click', () => this.hideAddSubjectModal());
-        document.getElementById('cancelAddSubject').addEventListener('click', () => this.hideAddSubjectModal());
-        document.getElementById('closeEditSubjectModal').addEventListener('click', () => this.hideEditSubjectModal());
-        document.getElementById('cancelEditSubject').addEventListener('click', () => this.hideEditSubjectModal());
-        document.getElementById('cancelDeleteSubject').addEventListener('click', () => this.hideDeleteSubjectModal());
-        document.getElementById('confirmDeleteSubject').addEventListener('click', () => this.handleDeleteSubject());
+        const closeAddSubjectModal = document.getElementById('closeAddSubjectModal');
+        const cancelAddSubject = document.getElementById('cancelAddSubject');
+        const closeEditSubjectModal = document.getElementById('closeEditSubjectModal');
+        const cancelEditSubject = document.getElementById('cancelEditSubject');
+        const cancelDeleteSubject = document.getElementById('cancelDeleteSubject');
+        const confirmDeleteSubject = document.getElementById('confirmDeleteSubject');
+        
+        if (closeAddSubjectModal) {
+            closeAddSubjectModal.addEventListener('click', () => this.hideAddSubjectModal());
+        }
+        
+        if (cancelAddSubject) {
+            cancelAddSubject.addEventListener('click', () => this.hideAddSubjectModal());
+        }
+        
+        if (closeEditSubjectModal) {
+            closeEditSubjectModal.addEventListener('click', () => this.hideEditSubjectModal());
+        }
+        
+        if (cancelEditSubject) {
+            cancelEditSubject.addEventListener('click', () => this.hideEditSubjectModal());
+        }
+        
+        if (cancelDeleteSubject) {
+            cancelDeleteSubject.addEventListener('click', () => this.hideDeleteSubjectModal());
+        }
+        
+        if (confirmDeleteSubject) {
+            confirmDeleteSubject.addEventListener('click', () => this.handleDeleteSubject());
+        }
         
         // Quiz management
         this.setupQuizEventListeners();
