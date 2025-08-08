@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page - SmartTest Arena</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">SmartTest Arena - Test Page</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Deployment Test</h2>
+            <p class="mb-4">If you can see this page, the deployment is working correctly.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <h3 class="font-medium">Test Buttons:</h3>
+                    <div class="flex space-x-4 mt-2">
+                        <button id="testBtn1" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Test Button 1</button>
+                        <button id="testBtn2" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Test Button 2</button>
+                        <button id="testBtn3" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Test Button 3</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="font-medium">Test Form:</h3>
+                    <form id="testForm" class="mt-2">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-1">Test Input:</label>
+                            <input type="text" id="testInput" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Type something...">
+                        </div>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Submit Test</button>
+                    </form>
+                </div>
+                
+                <div>
+                    <h3 class="font-medium">Console Output:</h3>
+                    <div id="consoleOutput" class="bg-gray-100 p-3 rounded text-sm font-mono h-32 overflow-y-auto">
+                        <p>Console messages will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <a href="/" class="text-blue-600 hover:underline">← Back to Main Page</a>
+        </div>
+    </div>
+
+    <script>
+        console.log('Test page loaded successfully');
+        
+        // Test button functionality
+        document.getElementById('testBtn1').addEventListener('click', () => {
+            console.log('Test button 1 clicked');
+            document.getElementById('consoleOutput').innerHTML += '<p>✓ Test button 1 clicked</p>';
+        });
+        
+        document.getElementById('testBtn2').addEventListener('click', () => {
+            console.log('Test button 2 clicked');
+            document.getElementById('consoleOutput').innerHTML += '<p>✓ Test button 2 clicked</p>';
+        });
+        
+        document.getElementById('testBtn3').addEventListener('click', () => {
+            console.log('Test button 3 clicked');
+            document.getElementById('consoleOutput').innerHTML += '<p>✓ Test button 3 clicked</p>';
+        });
+        
+        // Test form functionality
+        document.getElementById('testForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('testInput').value;
+            console.log('Form submitted with:', input);
+            document.getElementById('consoleOutput').innerHTML += `<p>✓ Form submitted with: "${input}"</p>`;
+        });
+        
+        // Log page load
+        document.getElementById('consoleOutput').innerHTML += '<p>✓ Test page loaded successfully</p>';
+    </script>
+</body>
+</html>

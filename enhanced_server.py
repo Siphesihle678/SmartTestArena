@@ -303,6 +303,11 @@ def serve_static(path: str):
     except:
         return {"error": f"File {path} not found"}
 
+@app.get("/test")
+def serve_test():
+    """Serve the test page"""
+    return FileResponse("frontend/test.html")
+
 # Authentication endpoints
 @app.post("/auth/signup", response_model=Token)
 def signup(user: UserCreate, db: SessionLocal = Depends(get_db)):
