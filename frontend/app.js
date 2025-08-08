@@ -9,6 +9,16 @@ class SmartTestArena {
         this.performanceChart = null;
         this.analyticsChart = null;
         this.subjectToDelete = null;
+        
+        // Quiz state management
+        this.currentQuiz = null;
+        this.quizQuestions = [];
+        this.currentQuestionIndex = 0;
+        this.userAnswers = {};
+        this.markedForReview = new Set();
+        this.quizStartTime = null;
+        this.quizTimer = null;
+        
         this.init();
     }
 
@@ -197,6 +207,9 @@ class SmartTestArena {
         document.getElementById('cancelEditSubject').addEventListener('click', () => this.hideEditSubjectModal());
         document.getElementById('cancelDeleteSubject').addEventListener('click', () => this.hideDeleteSubjectModal());
         document.getElementById('confirmDeleteSubject').addEventListener('click', () => this.handleDeleteSubject());
+        
+        // Quiz management
+        this.setupQuizEventListeners();
     }
 
     updateAuthUI() {
@@ -938,9 +951,229 @@ class SmartTestArena {
 
     startQuizForSubject(subjectId) {
         this.showQuizSection();
-        // TODO: Pre-select the subject in quiz setup
+        // Pre-select the subject in quiz setup
+        document.getElementById('quizSubject').value = subjectId;
+        this.loadTopicsForQuiz(subjectId);
         this.showToast('Quiz section opened', 'info');
     }
+
+    // Quiz System Implementation
+    setupQuizEventListeners() {
+        // Quiz setup listeners
+        document.getElementById('quizSubject').addEventListener('change', (e) => {
+            const subjectId = e.target.value;
+            if (subjectId) {
+                this.loadTopicsForQuiz(subjectId);
+            } else {
+                this.clearTopicsDropdown();
+            }
+        });
+
+        document.getElementById('quizTopic').addEventListener('change', () => {
+            this.validateQuizSetup();
+        });
+
+        document.getElementById('startQuizBtn').addEventListener('click', () => {
+            this.startQuiz();
+        });
+
+        document.getElementById('manageQuestionsBtn').addEventListener('click', () => {
+            this.showQuestionManagement();
+        });
+
+        // Quiz taking listeners
+        document.getElementById('prevQuestionBtn').addEventListener('click', () => {
+            this.goToPreviousQuestion();
+        });
+
+        document.getElementById('nextQuestionBtn').addEventListener('click', () => {
+            this.goToNextQuestion();
+        });
+
+        document.getElementById('markForReviewBtn').addEventListener('click', () => {
+            this.toggleMarkForReview();
+        });
+
+        document.getElementById('submitQuizBtn').addEventListener('click', () => {
+            this.confirmSubmitQuiz();
+        });
+
+        // Quiz results listeners
+        document.getElementById('reviewAnswersBtn').addEventListener('click', () => {
+            this.reviewAnswers();
+        });
+
+        document.getElementById('retakeQuizBtn').addEventListener('click', () => {
+            this.retakeQuiz();
+        });
+
+        document.getElementById('backToQuizSetupBtn').addEventListener('click', () => {
+            this.backToQuizSetup();
+        });
+
+        // Question management listeners
+        document.getElementById('closeQuestionModal').addEventListener('click', () => {
+            this.hideQuestionManagement();
+        });
+
+        document.getElementById('addQuestionBtn').addEventListener('click', () => {
+            this.showAddQuestionForm();
+        });
+    }
+
+    // Quiz Setup Methods
+    async loadSubjectsForQuiz() {
+        try {
+            const subjects = await this.getSubjects();
+            const dropdown = document.getElementById('quizSubject');
+            dropdown.innerHTML = '<option value="">Select a subject</option>';
+            
+            subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.id;
+                option.textContent = subject.name;
+                dropdown.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Failed to load subjects for quiz:', error);
+            this.showToast('Failed to load subjects', 'error');
+        }
+    }
+
+    async loadTopicsForQuiz(subjectId) {
+        try {
+            const topics = await this.apiRequest(`/subjects/${subjectId}/topics`);
+            const dropdown = document.getElementById('quizTopic');
+            dropdown.innerHTML = '<option value="">Select a topic</option>';
+            dropdown.disabled = false;
+            
+            topics.forEach(topic => {
+                const option = document.createElement('option');
+                option.value = topic.id;
+                option.textContent = topic.name;
+                dropdown.appendChild(option);
+            });
+            
+            this.validateQuizSetup();
+        } catch (error) {
+            console.error('Failed to load topics:', error);
+            this.showToast('Failed to load topics', 'error');
+            this.clearTopicsDropdown();
+        }
+    }
+
+    clearTopicsDropdown() {
+        const dropdown = document.getElementById('quizTopic');
+        dropdown.innerHTML = '<option value="">Select a topic</option>';
+        dropdown.disabled = true;
+        this.validateQuizSetup();
+    }
+
+    validateQuizSetup() {
+        const subjectId = document.getElementById('quizSubject').value;
+        const topicId = document.getElementById('quizTopic').value;
+        const startBtn = document.getElementById('startQuizBtn');
+        
+        startBtn.disabled = !subjectId || !topicId;
+    }
+
+    // Quiz Execution Methods
+    async startQuiz() {
+        const subjectId = parseInt(document.getElementById('quizSubject').value);
+        const topicId = parseInt(document.getElementById('quizTopic').value);
+        const questionCount = parseInt(document.getElementById('quizQuestionCount').value);
+        const difficulty = document.getElementById('quizDifficulty').value;
+
+        if (!subjectId || !topicId) {
+            this.showToast('Please select both subject and topic', 'error');
+            return;
+        }
+
+        try {
+            // Load questions for the selected topic
+            let questions = await this.apiRequest(`/topics/${topicId}/questions`);
+            
+            // Filter by difficulty if specified
+            if (difficulty) {
+                questions = questions.filter(q => q.difficulty === difficulty);
+            }
+
+            if (questions.length === 0) {
+                this.showToast('No questions available for the selected criteria', 'error');
+                return;
+            }
+
+            // Randomly select questions up to the requested count
+            if (questions.length > questionCount) {
+                questions = this.shuffleArray(questions).slice(0, questionCount);
+            }
+
+            // Initialize quiz state
+            this.currentQuiz = {
+                subjectId,
+                topicId,
+                subjectName: document.getElementById('quizSubject').selectedOptions[0].text,
+                topicName: document.getElementById('quizTopic').selectedOptions[0].text
+            };
+            this.quizQuestions = questions;
+            this.currentQuestionIndex = 0;
+            this.userAnswers = {};
+            this.markedForReview = new Set();
+            this.quizStartTime = Date.now();
+
+            // Start the quiz interface
+            this.showQuizTaking();
+            this.displayQuestion();
+            this.startQuizTimer();
+            this.generateQuestionNavigator();
+
+            this.showToast('Quiz started! Good luck!', 'success');
+        } catch (error) {
+            console.error('Failed to start quiz:', error);
+            this.showToast('Failed to start quiz. Please try again.', 'error');
+        }
+    }
+
+    shuffleArray(array) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    // Override showQuizSection to load subjects when quiz section is shown
+    showQuizSection() {
+        this.showSection('quiz');
+        this.loadSubjectsForQuiz();
+        this.backToQuizSetup(); // Ensure we start from setup
+    }
+
+    // Placeholder methods for quiz functionality
+    showQuizTaking() { this.showToast('Quiz taking interface - coming soon!', 'info'); }
+    displayQuestion() { }
+    startQuizTimer() { }
+    generateQuestionNavigator() { }
+    goToPreviousQuestion() { }
+    goToNextQuestion() { }
+    toggleMarkForReview() { }
+    confirmSubmitQuiz() { }
+    submitQuiz() { }
+    showQuizResults() { }
+    reviewAnswers() { }
+    retakeQuiz() { this.backToQuizSetup(); }
+    backToQuizSetup() {
+        document.getElementById('quizTaking').classList.add('hidden');
+        document.getElementById('quizResults').classList.add('hidden');
+        document.getElementById('quizSetup').classList.remove('hidden');
+    }
+    showQuestionManagement() { this.showToast('Question management - coming soon!', 'info'); }
+    hideQuestionManagement() { }
+    loadQuestionsForManagement() { }
+    showAddQuestionForm() { }
+    editQuestion() { }
+    deleteQuestion() { }
 }
 
 // Initialize the application
