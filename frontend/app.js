@@ -25,6 +25,10 @@ class SmartTestArena {
         this.currentTimeRange = 30;
         this.currentSubjectFilter = '';
         
+        // Profile state management
+        this.profileData = null;
+        this.userPreferences = null;
+        
         this.init();
     }
 
@@ -219,6 +223,9 @@ class SmartTestArena {
         
         // Analytics management
         this.setupAnalyticsEventListeners();
+        
+        // Profile management
+        this.setupProfileEventListeners();
     }
 
     updateAuthUI() {
@@ -1725,6 +1732,394 @@ class SmartTestArena {
         } catch (error) {
             console.error('Failed to load subjects for analytics:', error);
         }
+    }
+
+    // Profile System Implementation
+    setupProfileEventListeners() {
+        // Profile action buttons
+        document.getElementById('editProfileBtn').addEventListener('click', () => {
+            this.showEditProfileModal();
+        });
+
+        document.getElementById('changePasswordBtn').addEventListener('click', () => {
+            this.showChangePasswordModal();
+        });
+
+        // Avatar upload
+        document.getElementById('uploadAvatarBtn').addEventListener('click', () => {
+            document.getElementById('avatarInput').click();
+        });
+
+        document.getElementById('avatarInput').addEventListener('change', (e) => {
+            this.handleAvatarUpload(e);
+        });
+
+        // Modal controls
+        document.getElementById('closeEditProfileModal').addEventListener('click', () => {
+            this.hideEditProfileModal();
+        });
+
+        document.getElementById('cancelEditProfile').addEventListener('click', () => {
+            this.hideEditProfileModal();
+        });
+
+        document.getElementById('closeChangePasswordModal').addEventListener('click', () => {
+            this.hideChangePasswordModal();
+        });
+
+        document.getElementById('cancelChangePassword').addEventListener('click', () => {
+            this.hideChangePasswordModal();
+        });
+
+        // Form submissions
+        document.getElementById('editProfileForm').addEventListener('submit', (e) => {
+            this.handleEditProfile(e);
+        });
+
+        document.getElementById('changePasswordForm').addEventListener('submit', (e) => {
+            this.handleChangePassword(e);
+        });
+
+        // Preferences
+        document.getElementById('savePreferencesBtn').addEventListener('click', () => {
+            this.saveUserPreferences();
+        });
+    }
+
+    async loadProfileData() {
+        if (!this.currentUser) return;
+
+        try {
+            this.showLoading();
+            
+            // Load user profile data
+            const profileData = await this.apiRequest(`/users/${this.currentUser.id}/profile`);
+            this.profileData = profileData;
+            
+            // Load user preferences
+            const preferences = await this.apiRequest(`/users/${this.currentUser.id}/preferences`);
+            this.userPreferences = preferences;
+            
+            // Update profile display
+            this.updateProfileDisplay(profileData);
+            this.updateProfileStats(profileData);
+            this.updateUserPreferences(preferences);
+            this.updateRecommendations(profileData);
+            
+            this.hideLoading();
+        } catch (error) {
+            console.error('Failed to load profile data:', error);
+            this.showToast('Failed to load profile data', 'error');
+            this.hideLoading();
+        }
+    }
+
+    updateProfileDisplay(profileData) {
+        // Update avatar
+        const avatarContainer = document.getElementById('profileAvatar');
+        if (profileData.avatar_url) {
+            avatarContainer.innerHTML = `<img src="${profileData.avatar_url}" alt="Profile" class="w-full h-full object-cover rounded-full">`;
+        } else {
+            const initials = `${profileData.first_name?.charAt(0) || ''}${profileData.last_name?.charAt(0) || ''}`.toUpperCase();
+            avatarContainer.innerHTML = `<span class="text-3xl font-bold text-gray-600">${initials}</span>`;
+        }
+
+        // Update profile info
+        document.getElementById('profileName').textContent = `${profileData.first_name} ${profileData.last_name}`;
+        document.getElementById('profileEmail').textContent = profileData.email;
+        document.getElementById('profileRole').textContent = profileData.role || 'Student';
+
+        // Update personal information
+        const profileInfo = document.getElementById('profileInfo');
+        profileInfo.innerHTML = `
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium">Phone:</span>
+                <span>${profileData.phone || 'Not provided'}</span>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium">Date of Birth:</span>
+                <span>${profileData.date_of_birth ? new Date(profileData.date_of_birth).toLocaleDateString() : 'Not provided'}</span>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium">Member Since:</span>
+                <span>${new Date(profileData.created_at).toLocaleDateString()}</span>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium block mb-1">Bio:</span>
+                <span class="text-sm">${profileData.bio || 'No bio provided'}</span>
+            </div>
+        `;
+    }
+
+    updateProfileStats(profileData) {
+        const stats = profileData.stats || {};
+        const profileStats = document.getElementById('profileStats');
+        
+        profileStats.innerHTML = `
+            <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                <span class="font-medium text-blue-700">Total Quizzes:</span>
+                <span class="font-bold text-blue-900">${stats.total_quizzes || 0}</span>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                <span class="font-medium text-green-700">Average Score:</span>
+                <span class="font-bold text-green-900">${stats.average_score || 0}%</span>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                <span class="font-medium text-purple-700">Study Streak:</span>
+                <span class="font-bold text-purple-900">${stats.current_streak || 0} days</span>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                <span class="font-medium text-orange-700">Total Study Time:</span>
+                <span class="font-bold text-orange-900">${Math.floor((stats.total_study_time || 0) / 60)}h ${(stats.total_study_time || 0) % 60}m</span>
+            </div>
+        `;
+    }
+
+    updateUserPreferences(preferences) {
+        if (!preferences) return;
+
+        // Update preference controls
+        document.getElementById('studyGoalPreference').value = preferences.study_goal || 30;
+        document.getElementById('quizDifficultyPreference').value = preferences.quiz_difficulty || 'medium';
+        document.getElementById('emailNotifications').checked = preferences.email_notifications !== false;
+        document.getElementById('studyReminders').checked = preferences.study_reminders !== false;
+        document.getElementById('progressUpdates').checked = preferences.progress_updates || false;
+    }
+
+    updateRecommendations(profileData) {
+        const recommendations = document.getElementById('recommendations');
+        const stats = profileData.stats || {};
+        
+        let recommendationsList = [];
+        
+        // Generate recommendations based on profile data
+        if (stats.average_score < 70) {
+            recommendationsList.push({
+                icon: 'fas fa-chart-line',
+                color: 'text-blue-600',
+                text: 'Focus on improving your average score by reviewing incorrect answers'
+            });
+        }
+        
+        if (stats.current_streak < 3) {
+            recommendationsList.push({
+                icon: 'fas fa-fire',
+                color: 'text-orange-600',
+                text: 'Build a consistent study streak by practicing daily'
+            });
+        }
+        
+        if (!profileData.bio) {
+            recommendationsList.push({
+                icon: 'fas fa-user-edit',
+                color: 'text-green-600',
+                text: 'Complete your profile by adding a bio'
+            });
+        }
+        
+        if (recommendationsList.length === 0) {
+            recommendationsList.push({
+                icon: 'fas fa-star',
+                color: 'text-yellow-600',
+                text: 'Great job! Keep up the excellent work'
+            });
+        }
+        
+        recommendations.innerHTML = recommendationsList.map(rec => `
+            <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                <i class="${rec.icon} ${rec.color} mt-1"></i>
+                <span class="text-sm">${rec.text}</span>
+            </div>
+        `).join('');
+    }
+
+    showEditProfileModal() {
+        if (!this.profileData) return;
+        
+        // Populate form with current data
+        document.getElementById('editFirstName').value = this.profileData.first_name || '';
+        document.getElementById('editLastName').value = this.profileData.last_name || '';
+        document.getElementById('editEmail').value = this.profileData.email || '';
+        document.getElementById('editPhone').value = this.profileData.phone || '';
+        document.getElementById('editDateOfBirth').value = this.profileData.date_of_birth || '';
+        document.getElementById('editBio').value = this.profileData.bio || '';
+        
+        document.getElementById('editProfileModal').classList.remove('hidden');
+    }
+
+    hideEditProfileModal() {
+        document.getElementById('editProfileModal').classList.add('hidden');
+    }
+
+    showChangePasswordModal() {
+        // Clear form
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmNewPassword').value = '';
+        
+        document.getElementById('changePasswordModal').classList.remove('hidden');
+    }
+
+    hideChangePasswordModal() {
+        document.getElementById('changePasswordModal').classList.add('hidden');
+    }
+
+    async handleEditProfile(e) {
+        e.preventDefault();
+        
+        try {
+            this.showLoading();
+            
+            const formData = {
+                first_name: document.getElementById('editFirstName').value,
+                last_name: document.getElementById('editLastName').value,
+                email: document.getElementById('editEmail').value,
+                phone: document.getElementById('editPhone').value,
+                date_of_birth: document.getElementById('editDateOfBirth').value,
+                bio: document.getElementById('editBio').value
+            };
+            
+            const response = await this.apiRequest(`/users/${this.currentUser.id}/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            this.profileData = { ...this.profileData, ...formData };
+            this.updateProfileDisplay(this.profileData);
+            this.hideEditProfileModal();
+            this.showToast('Profile updated successfully!', 'success');
+            
+            this.hideLoading();
+        } catch (error) {
+            console.error('Failed to update profile:', error);
+            this.showToast('Failed to update profile', 'error');
+            this.hideLoading();
+        }
+    }
+
+    async handleChangePassword(e) {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmNewPassword').value;
+        
+        if (newPassword !== confirmPassword) {
+            this.showToast('New passwords do not match', 'error');
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            this.showToast('Password must be at least 6 characters long', 'error');
+            return;
+        }
+        
+        try {
+            this.showLoading();
+            
+            const response = await this.apiRequest(`/users/${this.currentUser.id}/password`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    current_password: currentPassword,
+                    new_password: newPassword
+                })
+            });
+            
+            this.hideChangePasswordModal();
+            this.showToast('Password changed successfully!', 'success');
+            
+            this.hideLoading();
+        } catch (error) {
+            console.error('Failed to change password:', error);
+            this.showToast('Failed to change password. Please check your current password.', 'error');
+            this.hideLoading();
+        }
+    }
+
+    async handleAvatarUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // Validate file type and size
+        if (!file.type.startsWith('image/')) {
+            this.showToast('Please select an image file', 'error');
+            return;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            this.showToast('Image size must be less than 5MB', 'error');
+            return;
+        }
+        
+        try {
+            this.showLoading();
+            
+            const formData = new FormData();
+            formData.append('avatar', file);
+            
+            const response = await this.apiRequest(`/users/${this.currentUser.id}/avatar`, {
+                method: 'POST',
+                headers: {
+                    // Don't set Content-Type for FormData
+                },
+                body: formData
+            });
+            
+            // Update avatar display
+            const avatarContainer = document.getElementById('profileAvatar');
+            avatarContainer.innerHTML = `<img src="${response.avatar_url}" alt="Profile" class="w-full h-full object-cover rounded-full">`;
+            
+            this.showToast('Avatar uploaded successfully!', 'success');
+            this.hideLoading();
+        } catch (error) {
+            console.error('Failed to upload avatar:', error);
+            this.showToast('Failed to upload avatar', 'error');
+            this.hideLoading();
+        }
+    }
+
+    async saveUserPreferences() {
+        if (!this.currentUser) return;
+        
+        try {
+            this.showLoading();
+            
+            const preferences = {
+                study_goal: parseInt(document.getElementById('studyGoalPreference').value),
+                quiz_difficulty: document.getElementById('quizDifficultyPreference').value,
+                email_notifications: document.getElementById('emailNotifications').checked,
+                study_reminders: document.getElementById('studyReminders').checked,
+                progress_updates: document.getElementById('progressUpdates').checked
+            };
+            
+            const response = await this.apiRequest(`/users/${this.currentUser.id}/preferences`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(preferences)
+            });
+            
+            this.userPreferences = preferences;
+            this.showToast('Preferences saved successfully!', 'success');
+            this.hideLoading();
+        } catch (error) {
+            console.error('Failed to save preferences:', error);
+            this.showToast('Failed to save preferences', 'error');
+            this.hideLoading();
+        }
+    }
+
+    // Override showProfileSection to load profile data
+    showProfileSection() {
+        this.showSection('profile');
+        this.loadProfileData();
     }
 }
 
