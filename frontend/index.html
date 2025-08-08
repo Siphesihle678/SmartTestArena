@@ -534,25 +534,252 @@
 
         <!-- Analytics Section -->
         <section id="analytics" class="hidden">
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-2xl font-bold mb-6">Analytics & Performance</h3>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="lg:col-span-2">
-                        <h4 class="text-lg font-semibold mb-4">Subject Performance Overview</h4>
-                        <div class="relative h-96">
-                            <canvas id="performanceChart"></canvas>
+            <!-- Analytics Header with Controls -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
+                    <div>
+                        <h3 class="text-2xl font-bold">Advanced Analytics & Performance</h3>
+                        <p class="text-gray-600 mt-2">Comprehensive insights into your learning progress</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3 mt-4 lg:mt-0">
+                        <div class="flex items-center space-x-2">
+                            <label class="text-sm font-medium text-gray-700">Time Range:</label>
+                            <select id="analyticsTimeRange" class="px-3 py-1 border border-gray-300 rounded-md text-sm">
+                                <option value="7">Last 7 days</option>
+                                <option value="30" selected>Last 30 days</option>
+                                <option value="90">Last 3 months</option>
+                                <option value="365">Last year</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label class="text-sm font-medium text-gray-700">Subject:</label>
+                            <select id="analyticsSubjectFilter" class="px-3 py-1 border border-gray-300 rounded-md text-sm">
+                                <option value="">All Subjects</option>
+                            </select>
+                        </div>
+                        <button id="exportAnalyticsBtn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition text-sm">
+                            <i class="fas fa-download mr-2"></i> Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Overall Performance Chart -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-semibold">Overall Performance Trend</h4>
+                        <div class="flex space-x-2">
+                            <button id="performanceChartType" class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded" data-type="line">Line</button>
+                            <button class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded" data-type="bar">Bar</button>
                         </div>
                     </div>
-                    <div>
-                        <h4 class="text-lg font-semibold mb-4">Performance Summary</h4>
-                        <div id="performanceSummary" class="space-y-3">
-                            <!-- Performance summary will be loaded here -->
+                    <div class="relative h-64">
+                        <canvas id="overallPerformanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Subject Comparison Chart -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-lg font-semibold mb-4">Subject Performance Comparison</h4>
+                    <div class="relative h-64">
+                        <canvas id="subjectComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Analytics Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <!-- Performance Metrics -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-lg font-semibold mb-4">Performance Metrics</h4>
+                    <div id="performanceMetrics" class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                            <span class="text-sm font-medium text-blue-700">Average Score</span>
+                            <span class="text-lg font-bold text-blue-900" id="avgScoreMetric">0%</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-sm font-medium text-green-700">Total Attempts</span>
+                            <span class="text-lg font-bold text-green-900" id="totalAttemptsMetric">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                            <span class="text-sm font-medium text-purple-700">Study Time</span>
+                            <span class="text-lg font-bold text-purple-900" id="studyTimeMetric">0h</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                            <span class="text-sm font-medium text-orange-700">Improvement Rate</span>
+                            <span class="text-lg font-bold text-orange-900" id="improvementRateMetric">0%</span>
                         </div>
                     </div>
+                </div>
+
+                <!-- Progress Tracking -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-lg font-semibold mb-4">Progress Tracking</h4>
+                    <div id="progressTracking" class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Weekly Goal</span>
+                                <span id="weeklyGoalProgress">0/5</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" id="weeklyGoalBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Monthly Target</span>
+                                <span id="monthlyTargetProgress">0/20</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-600 h-2 rounded-full transition-all duration-300" id="monthlyTargetBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <div class="flex justify-between mb-1">
+                                <span>Streak</span>
+                                <span id="currentStreak">0 days</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Best Streak</span>
+                                <span id="bestStreak">0 days</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-lg font-semibold mb-4">Recent Activity</h4>
+                    <div id="recentActivityList" class="space-y-3 max-h-48 overflow-y-auto">
+                        <!-- Recent activity items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Reports Section -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h4 class="text-lg font-semibold">Detailed Reports</h4>
+                    <div class="flex space-x-2">
+                        <button id="generateReportBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition text-sm">
+                            <i class="fas fa-file-alt mr-2"></i> Generate Report
+                        </button>
+                        <button id="exportReportBtn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition text-sm">
+                            <i class="fas fa-download mr-2"></i> Export PDF
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Report Filters -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div>
-                        <h4 class="text-lg font-semibold mb-4">Recent Trends</h4>
-                        <div id="recentTrends" class="space-y-2">
-                            <!-- Recent trends will be loaded here -->
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
+                        <select id="reportType" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                            <option value="performance">Performance Report</option>
+                            <option value="progress">Progress Report</option>
+                            <option value="comparison">Comparison Report</option>
+                            <option value="detailed">Detailed Analysis</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date From</label>
+                        <input type="date" id="reportDateFrom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
+                        <input type="date" id="reportDateTo" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Include</label>
+                        <select id="reportInclude" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                            <option value="all">All Data</option>
+                            <option value="quizzes">Quiz Attempts Only</option>
+                            <option value="subjects">Subject Performance</option>
+                            <option value="trends">Trends Analysis</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Report Content -->
+                <div id="reportContent" class="border border-gray-200 rounded-lg p-4 min-h-64">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-chart-line text-4xl mb-4"></i>
+                        <p>Select report options and click "Generate Report" to view detailed analytics</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Options Modal -->
+            <div id="exportModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+                <div class="flex items-center justify-center min-h-screen p-4">
+                    <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Export Analytics Data</h3>
+                            <button id="closeExportModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="px-6 py-4">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Export Format</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center">
+                                            <input type="radio" name="exportFormat" value="csv" checked class="mr-2">
+                                            <span>CSV (Excel compatible)</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio" name="exportFormat" value="json" class="mr-2">
+                                            <span>JSON (Raw data)</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio" name="exportFormat" value="pdf" class="mr-2">
+                                            <span>PDF (Formatted report)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Data Range</label>
+                                    <select id="exportDataRange" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                        <option value="all">All Time</option>
+                                        <option value="30">Last 30 days</option>
+                                        <option value="90">Last 3 months</option>
+                                        <option value="365">Last year</option>
+                                        <option value="custom">Custom range</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Include</label>
+                                    <div class="space-y-1">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="exportQuizzes" checked class="mr-2">
+                                            <span>Quiz attempts</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="exportPerformance" checked class="mr-2">
+                                            <span>Performance metrics</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="exportProgress" checked class="mr-2">
+                                            <span>Progress tracking</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="exportCharts" class="mr-2">
+                                            <span>Chart data</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex justify-end space-x-3">
+                                <button id="cancelExport" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    Cancel
+                                </button>
+                                <button id="confirmExport" class="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">
+                                    Export Data
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

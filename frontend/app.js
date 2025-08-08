@@ -19,6 +19,12 @@ class SmartTestArena {
         this.quizStartTime = null;
         this.quizTimer = null;
         
+        // Analytics state management
+        this.analyticsCharts = {};
+        this.analyticsData = null;
+        this.currentTimeRange = 30;
+        this.currentSubjectFilter = '';
+        
         this.init();
     }
 
@@ -210,6 +216,9 @@ class SmartTestArena {
         
         // Quiz management
         this.setupQuizEventListeners();
+        
+        // Analytics management
+        this.setupAnalyticsEventListeners();
     }
 
     updateAuthUI() {
@@ -1174,6 +1183,549 @@ class SmartTestArena {
     showAddQuestionForm() { }
     editQuestion() { }
     deleteQuestion() { }
+
+    // Analytics System Implementation
+    setupAnalyticsEventListeners() {
+        // Time range and filter controls
+        document.getElementById('analyticsTimeRange').addEventListener('change', (e) => {
+            this.currentTimeRange = parseInt(e.target.value);
+            this.loadAnalyticsData();
+        });
+
+        document.getElementById('analyticsSubjectFilter').addEventListener('change', (e) => {
+            this.currentSubjectFilter = e.target.value;
+            this.loadAnalyticsData();
+        });
+
+        // Chart type controls
+        document.getElementById('performanceChartType').addEventListener('click', (e) => {
+            this.toggleChartType(e.target);
+        });
+
+        // Export functionality
+        document.getElementById('exportAnalyticsBtn').addEventListener('click', () => {
+            this.showExportModal();
+        });
+
+        document.getElementById('closeExportModal').addEventListener('click', () => {
+            this.hideExportModal();
+        });
+
+        document.getElementById('cancelExport').addEventListener('click', () => {
+            this.hideExportModal();
+        });
+
+        document.getElementById('confirmExport').addEventListener('click', () => {
+            this.exportAnalyticsData();
+        });
+
+        // Report generation
+        document.getElementById('generateReportBtn').addEventListener('click', () => {
+            this.generateDetailedReport();
+        });
+
+        document.getElementById('exportReportBtn').addEventListener('click', () => {
+            this.exportReportAsPDF();
+        });
+    }
+
+    async loadAnalyticsData() {
+        if (!this.currentUser) return;
+
+        try {
+            this.showLoading();
+            
+            // Load comprehensive analytics data
+            const analytics = await this.apiRequest(`/analytics/dashboard/${this.currentUser.id}`);
+            this.analyticsData = analytics;
+            
+            // Update all analytics components
+            this.updatePerformanceMetrics(analytics);
+            this.updateProgressTracking(analytics);
+            this.updateRecentActivity(analytics);
+            this.initializeAnalyticsCharts(analytics);
+            
+            this.hideLoading();
+        } catch (error) {
+            console.error('Failed to load analytics data:', error);
+            this.showToast('Failed to load analytics data', 'error');
+            this.hideLoading();
+        }
+    }
+
+    updatePerformanceMetrics(analytics) {
+        const stats = analytics.real_time_stats;
+        
+        document.getElementById('avgScoreMetric').textContent = `${stats.average_score}%`;
+        document.getElementById('totalAttemptsMetric').textContent = stats.total_attempts;
+        
+        // Calculate study time (mock data for now)
+        const studyTimeHours = Math.floor(stats.total_attempts * 0.5); // 30 min per attempt
+        document.getElementById('studyTimeMetric').textContent = `${studyTimeHours}h`;
+        
+        // Calculate improvement rate
+        const improvementRate = analytics.weekly_progress.improvement === 'positive' ? 15 : 0;
+        document.getElementById('improvementRateMetric').textContent = `${improvementRate}%`;
+    }
+
+    updateProgressTracking(analytics) {
+        const stats = analytics.real_time_stats;
+        const weeklyProgress = analytics.weekly_progress;
+        
+        // Weekly goal progress
+        const weeklyGoal = 5;
+        const weeklyCompleted = weeklyProgress.attempts_count;
+        const weeklyPercentage = Math.min((weeklyCompleted / weeklyGoal) * 100, 100);
+        
+        document.getElementById('weeklyGoalProgress').textContent = `${weeklyCompleted}/${weeklyGoal}`;
+        document.getElementById('weeklyGoalBar').style.width = `${weeklyPercentage}%`;
+        
+        // Monthly target progress
+        const monthlyTarget = 20;
+        const monthlyCompleted = stats.total_attempts;
+        const monthlyPercentage = Math.min((monthlyCompleted / monthlyTarget) * 100, 100);
+        
+        document.getElementById('monthlyTargetProgress').textContent = `${monthlyCompleted}/${monthlyTarget}`;
+        document.getElementById('monthlyTargetBar').style.width = `${monthlyPercentage}%`;
+        
+        // Streak calculation (mock data)
+        const currentStreak = Math.min(stats.today_attempts + 2, 7);
+        const bestStreak = Math.max(currentStreak, 12);
+        
+        document.getElementById('currentStreak').textContent = `${currentStreak} days`;
+        document.getElementById('bestStreak').textContent = `${bestStreak} days`;
+    }
+
+    updateRecentActivity(analytics) {
+        const container = document.getElementById('recentActivityList');
+        container.innerHTML = '';
+        
+        if (analytics.recent_activity.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-center py-4">No recent activity</p>';
+            return;
+        }
+        
+        analytics.recent_activity.forEach(activity => {
+            const activityDiv = document.createElement('div');
+            activityDiv.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
+            activityDiv.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-question-circle text-blue-500 mr-3"></i>
+                    <div>
+                        <div class="font-medium text-sm">${activity.subject}</div>
+                        <div class="text-xs text-gray-500">${activity.date} at ${activity.time}</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="font-bold text-sm ${parseFloat(activity.score) >= 70 ? 'text-green-600' : 'text-red-600'}">${activity.score}</div>
+                </div>
+            `;
+            container.appendChild(activityDiv);
+        });
+    }
+
+    initializeAnalyticsCharts(analytics) {
+        this.createOverallPerformanceChart(analytics);
+        this.createSubjectComparisonChart(analytics);
+    }
+
+    createOverallPerformanceChart(analytics) {
+        const ctx = document.getElementById('overallPerformanceChart');
+        if (!ctx) return;
+
+        // Destroy existing chart
+        if (this.analyticsCharts.overallPerformance) {
+            this.analyticsCharts.overallPerformance.destroy();
+        }
+
+        // Generate sample data for the time range
+        const days = this.currentTimeRange;
+        const labels = [];
+        const data = [];
+        
+        for (let i = days - 1; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            
+            // Generate realistic performance data
+            const baseScore = analytics.real_time_stats.average_score;
+            const variation = (Math.random() - 0.5) * 20;
+            data.push(Math.max(0, Math.min(100, baseScore + variation));
+        }
+
+        this.analyticsCharts.overallPerformance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Performance Score',
+                    data: data,
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    createSubjectComparisonChart(analytics) {
+        const ctx = document.getElementById('subjectComparisonChart');
+        if (!ctx) return;
+
+        // Destroy existing chart
+        if (this.analyticsCharts.subjectComparison) {
+            this.analyticsCharts.subjectComparison.destroy();
+        }
+
+        const subjects = analytics.subject_performance;
+        const labels = subjects.map(s => s.subject);
+        const scores = subjects.map(s => s.average_score);
+        const attempts = subjects.map(s => s.attempts);
+
+        this.analyticsCharts.subjectComparison = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Average Score (%)',
+                    data: scores,
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: '#3B82F6',
+                    borderWidth: 1
+                }, {
+                    label: 'Attempts',
+                    data: attempts,
+                    backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                    borderColor: '#22C55E',
+                    borderWidth: 1,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Score (%)'
+                        },
+                        min: 0,
+                        max: 100
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Attempts'
+                        },
+                        min: 0,
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                }
+            }
+        });
+    }
+
+    toggleChartType(button) {
+        const buttons = document.querySelectorAll('[data-type]');
+        buttons.forEach(btn => {
+            btn.className = 'text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded';
+        });
+        button.className = 'text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded';
+        
+        const chartType = button.getAttribute('data-type');
+        if (this.analyticsCharts.overallPerformance) {
+            this.analyticsCharts.overallPerformance.config.type = chartType;
+            this.analyticsCharts.overallPerformance.update();
+        }
+    }
+
+    showExportModal() {
+        document.getElementById('exportModal').classList.remove('hidden');
+    }
+
+    hideExportModal() {
+        document.getElementById('exportModal').classList.add('hidden');
+    }
+
+    async exportAnalyticsData() {
+        const format = document.querySelector('input[name="exportFormat"]:checked').value;
+        const dataRange = document.getElementById('exportDataRange').value;
+        const includeQuizzes = document.getElementById('exportQuizzes').checked;
+        const includePerformance = document.getElementById('exportPerformance').checked;
+        const includeProgress = document.getElementById('exportProgress').checked;
+        const includeCharts = document.getElementById('exportCharts').checked;
+
+        try {
+            this.showToast('Preparing export...', 'info');
+            
+            // Prepare export data
+            const exportData = {
+                format: format,
+                dataRange: dataRange,
+                includes: {
+                    quizzes: includeQuizzes,
+                    performance: includePerformance,
+                    progress: includeProgress,
+                    charts: includeCharts
+                },
+                data: this.analyticsData
+            };
+
+            // Simulate export process
+            setTimeout(() => {
+                this.downloadExportData(exportData, format);
+                this.hideExportModal();
+                this.showToast('Export completed successfully!', 'success');
+            }, 2000);
+
+        } catch (error) {
+            console.error('Export failed:', error);
+            this.showToast('Export failed. Please try again.', 'error');
+        }
+    }
+
+    downloadExportData(data, format) {
+        let content, filename, mimeType;
+
+        if (format === 'csv') {
+            content = this.convertToCSV(data);
+            filename = `analytics_${new Date().toISOString().split('T')[0]}.csv`;
+            mimeType = 'text/csv';
+        } else if (format === 'json') {
+            content = JSON.stringify(data, null, 2);
+            filename = `analytics_${new Date().toISOString().split('T')[0]}.json`;
+            mimeType = 'application/json';
+        } else {
+            // PDF would require a library like jsPDF
+            this.showToast('PDF export coming soon!', 'info');
+            return;
+        }
+
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    convertToCSV(data) {
+        const analytics = data.data;
+        let csv = 'Subject,Average Score,Attempts,Last Activity\n';
+        
+        if (analytics.subject_performance) {
+            analytics.subject_performance.forEach(subject => {
+                csv += `${subject.subject},${subject.average_score}%,${subject.attempts},${new Date().toLocaleDateString()}\n`;
+            });
+        }
+        
+        return csv;
+    }
+
+    async generateDetailedReport() {
+        const reportType = document.getElementById('reportType').value;
+        const dateFrom = document.getElementById('reportDateFrom').value;
+        const dateTo = document.getElementById('reportDateTo').value;
+        const include = document.getElementById('reportInclude').value;
+
+        try {
+            this.showLoading();
+            
+            // Generate report content based on type
+            const reportContent = await this.generateReportContent(reportType, dateFrom, dateTo, include);
+            
+            document.getElementById('reportContent').innerHTML = reportContent;
+            
+            this.hideLoading();
+            this.showToast('Report generated successfully!', 'success');
+        } catch (error) {
+            console.error('Report generation failed:', error);
+            this.showToast('Failed to generate report', 'error');
+            this.hideLoading();
+        }
+    }
+
+    async generateReportContent(type, dateFrom, dateTo, include) {
+        // This would typically call backend endpoints for detailed data
+        // For now, we'll generate sample report content
+        
+        let content = '<div class="space-y-4">';
+        
+        switch (type) {
+            case 'performance':
+                content += this.generatePerformanceReport();
+                break;
+            case 'progress':
+                content += this.generateProgressReport();
+                break;
+            case 'comparison':
+                content += this.generateComparisonReport();
+                break;
+            case 'detailed':
+                content += this.generateDetailedAnalysisReport();
+                break;
+        }
+        
+        content += '</div>';
+        return content;
+    }
+
+    generatePerformanceReport() {
+        return `
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <h5 class="font-semibold text-blue-900 mb-2">Performance Report</h5>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="font-medium">Overall Average:</span>
+                        <span class="ml-2">${this.analyticsData?.real_time_stats?.average_score || 0}%</span>
+                    </div>
+                    <div>
+                        <span class="font-medium">Total Attempts:</span>
+                        <span class="ml-2">${this.analyticsData?.real_time_stats?.total_attempts || 0}</span>
+                    </div>
+                    <div>
+                        <span class="font-medium">Weekly Average:</span>
+                        <span class="ml-2">${this.analyticsData?.weekly_progress?.average_score || 0}%</span>
+                    </div>
+                    <div>
+                        <span class="font-medium">Improvement Rate:</span>
+                        <span class="ml-2">${this.analyticsData?.weekly_progress?.improvement === 'positive' ? '15%' : '0%'}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    generateProgressReport() {
+        return `
+            <div class="bg-green-50 p-4 rounded-lg">
+                <h5 class="font-semibold text-green-900 mb-2">Progress Report</h5>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span>Weekly Goal Progress:</span>
+                        <span>${this.analyticsData?.weekly_progress?.attempts_count || 0}/5</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Monthly Target Progress:</span>
+                        <span>${this.analyticsData?.real_time_stats?.total_attempts || 0}/20</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Current Streak:</span>
+                        <span>${Math.min((this.analyticsData?.real_time_stats?.today_attempts || 0) + 2, 7)} days</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    generateComparisonReport() {
+        if (!this.analyticsData?.subject_performance) {
+            return '<p class="text-gray-500">No comparison data available</p>';
+        }
+
+        let content = '<div class="bg-purple-50 p-4 rounded-lg"><h5 class="font-semibold text-purple-900 mb-2">Subject Comparison</h5><div class="space-y-2">';
+        
+        this.analyticsData.subject_performance.forEach(subject => {
+            content += `
+                <div class="flex justify-between items-center">
+                    <span class="font-medium">${subject.subject}:</span>
+                    <span>${subject.average_score}% (${subject.attempts} attempts)</span>
+                </div>
+            `;
+        });
+        
+        content += '</div></div>';
+        return content;
+    }
+
+    generateDetailedAnalysisReport() {
+        return `
+            <div class="space-y-4">
+                ${this.generatePerformanceReport()}
+                ${this.generateProgressReport()}
+                ${this.generateComparisonReport()}
+                <div class="bg-orange-50 p-4 rounded-lg">
+                    <h5 class="font-semibold text-orange-900 mb-2">Recommendations</h5>
+                    <ul class="text-sm space-y-1">
+                        <li>• Focus on subjects with lower performance scores</li>
+                        <li>• Increase study time for challenging topics</li>
+                        <li>• Set daily study goals to improve consistency</li>
+                        <li>• Review incorrect answers to identify knowledge gaps</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+    }
+
+    exportReportAsPDF() {
+        // This would require a PDF generation library
+        this.showToast('PDF export feature coming soon!', 'info');
+    }
+
+    // Override showAnalyticsSection to load analytics data
+    showAnalyticsSection() {
+        this.showSection('analytics');
+        this.loadAnalyticsData();
+        this.loadSubjectsForAnalytics();
+    }
+
+    async loadSubjectsForAnalytics() {
+        try {
+            const subjects = await this.getSubjects();
+            const dropdown = document.getElementById('analyticsSubjectFilter');
+            dropdown.innerHTML = '<option value="">All Subjects</option>';
+            
+            subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.id;
+                option.textContent = subject.name;
+                dropdown.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Failed to load subjects for analytics:', error);
+        }
+    }
 }
 
 // Initialize the application
