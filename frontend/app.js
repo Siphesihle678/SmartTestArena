@@ -34,11 +34,36 @@ class SmartTestArena {
 
     async init() {
         console.log('🚀 Initializing SmartTest Arena Frontend...');
+        
+        // Add immediate debugging
+        console.log('DOM ready, setting up event listeners...');
+        
         if (this.authToken) {
             await this.validateToken();
         }
         this.setupEventListeners();
         this.showAppropriateSection();
+        
+        // Add immediate button testing
+        console.log('Testing button functionality...');
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        
+        if (loginBtn) {
+            console.log('Login button found, adding immediate listener');
+            loginBtn.onclick = () => {
+                console.log('Login button clicked!');
+                this.showLoginForm();
+            };
+        }
+        
+        if (signupBtn) {
+            console.log('Signup button found, adding immediate listener');
+            signupBtn.onclick = () => {
+                console.log('Signup button clicked!');
+                this.showSignupForm();
+            };
+        }
     }
 
     // API Communication
@@ -392,15 +417,39 @@ class SmartTestArena {
     }
 
     showLoginForm() {
+        console.log('showLoginForm called');
         this.showSection('authForms');
-        document.getElementById('loginForm').classList.remove('hidden');
-        document.getElementById('signupForm').classList.add('hidden');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        
+        if (loginForm) {
+            loginForm.classList.remove('hidden');
+            console.log('Login form shown');
+        } else {
+            console.error('Login form not found!');
+        }
+        
+        if (signupForm) {
+            signupForm.classList.add('hidden');
+        }
     }
 
     showSignupForm() {
+        console.log('showSignupForm called');
         this.showSection('authForms');
-        document.getElementById('signupForm').classList.remove('hidden');
-        document.getElementById('loginForm').classList.add('hidden');
+        const signupForm = document.getElementById('signupForm');
+        const loginForm = document.getElementById('loginForm');
+        
+        if (signupForm) {
+            signupForm.classList.remove('hidden');
+            console.log('Signup form shown');
+        } else {
+            console.error('Signup form not found!');
+        }
+        
+        if (loginForm) {
+            loginForm.classList.add('hidden');
+        }
     }
 
     showDashboard() {
